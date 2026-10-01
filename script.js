@@ -185,7 +185,28 @@ spin.addEventListener("focusout", () => { hovering = false; });
   • Web Audio — если звук встроен прямо в страницу (window.EMBEDDED_AUDIO).
     Так музыка играет даже там, где <audio> блокируется (например, превью в чате).
 */
-const audio = document.getElementById("audio");
+/*
+  Для каждой песни — свой <audio>. Так уже загруженная песня не скачивается заново,
+  а песни можно подгружать заранее (см. «Предзагрузка» ниже).
+*/
+const tracks = new Map();   // src → <audio>
+let audio = null;           // тот, что играет сейчас
+
+function getTrack(src) {
+  if (tracks.has(src)) return tracks.get(src);
+  const el = new Audio();
+  el.preload = "auto";
+  el.src = src;
+  el.addEventListener("play", () => { if (el === audio) setPlaying(true); });
+  el.addEventListener("pause", () => { if (el === audio) setPlaying(false); });
+  el.addEventListener("ended", () => { if (el === audio) setPlaying(false); });
+  el.addEventListener("error", () => {
+    if (el === audio) setPlaying(false);
+    console.warn("Файл не найден или не читается:", src);
+  });
+  tracks.set(src, el);
+  return el;
+}
 const player = document.getElementById("player");
 const playerTitle = document.getElementById("playerTitle");
 const btnPlay = document.getElementById("btnPlay");
@@ -207,17 +228,15 @@ const engine = {
     this.decoding = null;
     this.offset = 0;
     const embedded = window.EMBEDDED_AUDIO && window.EMBEDDED_AUDIO[src];
+    if (audio) { audio.pause(); audio = null; }
     if (embedded) {
       this.mode = "webaudio";
-      audio.removeAttribute("src");
     } else if (src) {
       this.mode = "html";
-      audio.src = src;
-      audio.load();
+      audio = getTrack(src);
+      try { audio.currentTime = 0; } catch (e) {}
     } else {
       this.mode = "none";
-      audio.removeAttribute("src");
-      audio.load();
     }
   },
 
@@ -274,18 +293,18 @@ const engine = {
       this.node = null;
       try { node.stop(); } catch (e) {}
     }
-    if (this.mode === "html") audio.pause();
+    if (this.mode === "html" && audio) audio.pause();
     this.paused = true;
   },
 
   get currentTime() {
-    if (this.mode === "html") return audio.currentTime;
+    if (this.mode === "html") return audio ? audio.currentTime : 0;
     if (this.mode === "webaudio") return this.paused ? this.offset : this.ctx.currentTime - this.startedAt;
     return 0;
   },
 
   get duration() {
-    if (this.mode === "html") return audio.duration || 0;
+    if (this.mode === "html") return (audio && audio.duration) || 0;
     if (this.mode === "webaudio") return this.buffer ? this.buffer.duration : 0;
     return 0;
   },
@@ -365,17 +384,6 @@ btnPrev.addEventListener("click", () => {
 
 btnNext.addEventListener("click", () => {
   selectSong((current + 1) % SONGS.length, { autoplay: !engine.paused });
-});
-
-// События обычного <audio>
-audio.addEventListener("play", () => setPlaying(true));
-audio.addEventListener("pause", () => setPlaying(false));
-audio.addEventListener("ended", () => setPlaying(false));
-audio.addEventListener("error", () => {
-  if (engine.mode === "html" && audio.getAttribute("src")) {
-    console.warn("Файл не найден или не читается:", audio.getAttribute("src"));
-    setPlaying(false);
-  }
 });
 
 // Пробел на странице — включить / выключить (если фокус не на кнопке)
@@ -547,6 +555,46 @@ window.addEventListener("keydown", (e) => {
 
 // При перезагрузке всегда начинаем сверху — иначе можно оказаться посреди блока
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
+/* ---------- Предзагрузка песен ---------- */
+// Песня начинает грузиться, как только на неё навели курсор или коснулись пальцем,
+// а после загрузки страницы остальные тихо подгружаются по очереди.
+function preloadSong(s) {
+  const song = SONGS[s];
+  if (!song || !song.src || (window.EMBEDDED_AUDIO && window.EMBEDDED_AUDIO[song.src])) return;
+  getTrack(song.src);
+}
+
+spin.addEventListener("pointerover", (e) => {
+  const ray = e.target.closest(".ray");
+  if (ray) preloadSong(Number(ray.dataset.song));
+});
+spin.addEventListener("focusin", (e) => {
+  const ray = e.target.closest(".ray");
+  if (ray) preloadSong(Number(ray.dataset.song));
+});
+
+function preloadAllQuietly() {
+  const conn = navigator.connection;
+  if (conn && (conn.saveData || /2g/.test(conn.effectiveType || ""))) return; // бережём мобильный трафик
+  const queue = SONGS.map((_, i) => i).filter((i) => i !== current);
+  (function next() {
+    const s = queue.shift();
+    if (s === undefined) return;
+    preloadSong(s);
+    const el = SONGS[s].src && tracks.get(SONGS[s].src);
+    if (!el || el.readyState >= 4) { next(); return; }
+    // следующую грузим, когда эта загрузилась (или через 4 с, если долго)
+    const go = () => { clearTimeout(t); el.removeEventListener("canplaythrough", go); next(); };
+    const t = setTimeout(go, 4000);
+    el.addEventListener("canplaythrough", go);
+  })();
+}
+
+window.addEventListener("load", () => {
+  const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+  idle(preloadAllQuietly);
+});
 
 /* ---------- Старт ---------- */
 setCurrentSlot(START_SONG);
