@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Добро пожаловать — Black Parade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Old Standard TT — запасной шрифт, если Broadsheet не подключён -->
+  <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== Шапка: меню + плеер ===== -->
+  <header class="header">
+    <nav class="nav" aria-label="Главы">
+      <a href="#dead">МЕРТВ</a>
+      <a href="#parade">ПАРАД</a>
+      <a href="#i-dont-love-you">Я ТЕБЯ НЕ ЛЮБЛЮ</a>
+      <a href="#mama">МАМА...</a>
+      <a href="#last-words">ПОСЛЕДНЕЕ СЛОВО</a>
+    </nav>
+
+    <div class="player" id="player">
+      <p class="player__title" id="playerTitle" aria-live="polite">THE END.</p>
+      <div class="player__controls">
+        <button class="player__btn" id="btnPrev" type="button" aria-label="Предыдущая песня">
+          <svg viewBox="0 0 14 13" width="14" height="13" aria-hidden="true"><rect x="0" y="0.5" width="2" height="12"/><path d="M14 0.5v12L3 6.5z"/></svg>
+        </button>
+        <button class="player__btn player__btn--play" id="btnPlay" type="button" aria-label="Включить">
+          <svg class="icon-play" viewBox="0 0 12 13" width="12" height="13" aria-hidden="true"><path d="M0 0.5v12l12-6z"/></svg>
+          <svg class="icon-pause" viewBox="0 0 12 13" width="12" height="13" aria-hidden="true"><rect x="1" y="0.5" width="3.5" height="12"/><rect x="7.5" y="0.5" width="3.5" height="12"/></svg>
+        </button>
+        <button class="player__btn" id="btnNext" type="button" aria-label="Следующая песня">
+          <svg viewBox="0 0 14 13" width="14" height="13" aria-hidden="true"><path d="M0 0.5v12l11-6z"/><rect x="12" y="0.5" width="2" height="12"/></svg>
+        </button>
+      </div>
+      <div class="player__progress" aria-hidden="true"><span id="progressFill"></span></div>
+      <audio id="audio" preload="auto"></audio>
+    </div>
+  </header>
+
+  <!-- ===== Первый экран ===== -->
+  <section class="hero" aria-label="Black Parade">
+    <!-- Фон-бумага (assets/hero-bg.jpg, если появится; без черепа — он отдельным слоем) -->
+    <div class="hero__bg" aria-hidden="true"></div>
+
+    <!-- Череп: как в макете — режим наложения «Исключение» -->
+    <img class="skull" src="assets/skull.webp" alt="" aria-hidden="true">
+    <!-- Градиент чёрный → белый в режиме «Экран», как слой 206:82 в макете -->
+    <div class="hero__screen" aria-hidden="true"></div>
+
+    <!-- Красные буквы по бокам — бесконечная вертикальная бегущая строка -->
+    <div class="marquee marquee--left" aria-hidden="true">
+      <div class="marquee__track">
+        <img src="assets/black.webp" alt=""><img src="assets/black.webp" alt=""><img src="assets/black.webp" alt="">
+      </div>
+    </div>
+    <div class="marquee marquee--right" aria-hidden="true">
+      <div class="marquee__track">
+        <img src="assets/parade.webp" alt=""><img src="assets/parade.webp" alt=""><img src="assets/parade.webp" alt="">
+      </div>
+    </div>
+
+    <div class="stage">
+      <!-- Чернильная клякса в центре круга. Положи assets/ink.png — подхватится автоматически -->
+      <div class="ink" aria-hidden="true">
+        <img class="ink__img" src="assets/ink.png" alt="" onerror="this.parentNode.classList.add('ink--fallback'); this.remove();">
+        <svg class="ink__svg" viewBox="0 0 582 701" aria-hidden="true">
+          <defs>
+            <filter id="inkRough" x="-20%" y="-20%" width="140%" height="140%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="3" seed="7" result="n"/>
+              <feDisplacementMap in="SourceGraphic" in2="n" scale="110"/>
+            </filter>
+            <radialGradient id="inkFill" cx="50%" cy="50%" r="50%">
+              <stop offset="0" stop-color="#050505"/>
+              <stop offset=".7" stop-color="#151515"/>
+              <stop offset="1" stop-color="#3a3a3a"/>
+            </radialGradient>
+          </defs>
+          <g filter="url(#inkRough)" fill="url(#inkFill)">
+            <ellipse cx="291" cy="350" rx="190" ry="230"/>
+            <circle cx="120" cy="160" r="38"/><circle cx="470" cy="200" r="30"/>
+            <circle cx="500" cy="470" r="34"/><circle cx="110" cy="540" r="40"/>
+          </g>
+          <g fill="#111">
+            <circle cx="60" cy="90" r="9"/><circle cx="530" cy="110" r="7"/><circle cx="555" cy="330" r="11"/>
+            <circle cx="40" cy="380" r="8"/><circle cx="520" cy="620" r="6"/><circle cx="90" cy="660" r="10"/>
+            <circle cx="300" cy="40" r="6"/><circle cx="280" cy="680" r="8"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="hero__shade" aria-hidden="true"></div>
+
+      <!-- Круг с песнями: заполняется из script.js -->
+      <div class="wheel" id="wheel">
+        <div class="wheel__spin" id="wheelSpin"></div>
+      </div>
+
+      <div class="hero__fade" aria-hidden="true"></div>
+
+      <div class="hub">
+        <p class="hub__question">Кто говорит моим голосом?</p>
+        <p class="hub__name">BLACK PARADE</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Второй блок: текст печатается, как на машинке =====
+       Пока не напечатаются все четыре фразы, страница дальше не листается.
+       Каждая новая фраза появляется по прокрутке, прошлые затухают. -->
+  <section class="story" id="story" aria-label="Вступление">
+    <div class="story__stack">
+      <p class="story__block story__block--1">Если ты меня слышишь, значит, я ещё здесь.</p>
+      <p class="story__block story__block--2">Хотя я не знаю, что значит «здесь». В этой комнате?<br>По ту сторону экрана? В словах, которые<br>ты сейчас произносишь про себя?</p>
+      <p class="story__block story__block--3">Я хотел начать с имени. Но ты всё равно сначала<br>услышал бы голос и представил кого-нибудь своего.</p>
+      <p class="story__block story__block--4">Побудь со мной. Мне нужно кое-что рассказать, пока я ещё помню, с чего всё началось.</p>
+    </div>
+    <p class="story__hint" aria-hidden="true">листай <span>↓</span></p>
+  </section>
+
+  <!-- ===== Дальше — следующий блок (картинки и текст из макета), пока пусто ===== -->
+  <section class="after" id="after"></section>
+
+  <script src="script.js"></script>
+</body>
+</html>

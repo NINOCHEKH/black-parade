@@ -1,0 +1,546 @@
+/* =========================================================
+   Black Parade — первый экран
+   Все размеры из макета Figma (ширина 1728) пересчитаны через --u:
+   1 px макета = var(--u). Так экран масштабируется под любую ширину.
+   ========================================================= */
+
+/* Шрифт из макета. Положи файл в assets/fonts/ — иначе будет Old Standard TT */
+@font-face {
+  font-family: "Broadsheet";
+  src: local("Broadsheet"), local("Broadsheet Regular"),
+       url("assets/fonts/Broadsheet.woff2") format("woff2"),
+       url("assets/fonts/Broadsheet.woff") format("woff");
+  font-display: swap;
+}
+
+:root {
+  --u: calc(100vw / 1728);
+  --red: #c50000;
+  --red-spray: #c8000a;
+  --black: #010101;
+  --white: #ffffff;
+  --font: "Broadsheet", "Old Standard TT", "Times New Roman", serif;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+p { margin: 0; }
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* ===================== Меню ===================== */
+.header {
+  position: relative;
+  z-index: 20;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: max(48px, calc(70 * var(--u)));
+  padding: 0 calc(99 * var(--u));
+  background: var(--white);
+  border-bottom: 1px solid #000;
+}
+
+.nav a {
+  color: #000;
+  text-decoration: none;
+  font-size: max(12px, calc(18 * var(--u)));
+  line-height: 1.7;
+  white-space: nowrap;
+  transition: color .18s ease;
+}
+
+.nav a:hover,
+.nav a:focus-visible { color: var(--red); }
+
+.nav a:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 4px;
+}
+
+/* ===================== Плеер ===================== */
+.player {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: max(6px, calc(10 * var(--u)));
+  height: max(48px, calc(57 * var(--u)));
+  background: #000;
+  border: 0;
+  border-bottom: 1px solid var(--white);
+}
+
+.player__title {
+  font-size: max(12px, calc(15.8 * var(--u)));
+  line-height: 1;
+  letter-spacing: .02em;
+  transition: opacity .2s;
+}
+
+.player__controls {
+  display: flex;
+  align-items: center;
+  gap: max(14px, calc(16 * var(--u)));
+}
+
+.player__btn {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 18px;
+  fill: var(--white);
+  transition: fill .18s ease, opacity .18s;
+}
+
+.player__btn:hover:not(:disabled),
+.player__btn:focus-visible { fill: var(--red); }
+
+.player__btn:focus-visible {
+  outline: 1px solid var(--red);
+  outline-offset: 2px;
+}
+
+.player__btn:disabled { opacity: .3; cursor: default; }
+
+.player__btn .icon-pause { display: none; }
+.player.is-playing .icon-play { display: none; }
+.player.is-playing .icon-pause { display: block; }
+
+.player.is-empty .player__title { opacity: .45; }
+
+.player__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+}
+
+.player__progress span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--red);
+}
+
+/* ===================== Первый экран ===================== */
+.hero {
+  position: relative;
+  height: calc(980 * var(--u));
+  overflow: hidden;
+  background: var(--black);
+}
+
+/* Фон-бумага. Если положить assets/hero-bg.jpg — встанет поверх запасного */
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  background-color: #e4e2dd;
+  background-image:
+    url("assets/hero-bg.jpg"),
+    linear-gradient(180deg, rgba(255,255,255,.75) 0%, rgba(255,255,255,0) 55%),
+    radial-gradient(ellipse 70% 60% at 50% 40%, #d2d0cb 0%, #e2e0db 60%, #ecebe7 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: cover, auto, auto, 220px 220px;
+  background-position: center top;
+  background-blend-mode: normal, normal, multiply, normal;
+}
+
+/* Сцена шириной 1728 по центру — внутри круг, клякса и затемнения */
+.stage {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: calc(1728 * var(--u));
+  height: 100%;
+  transform: translateX(-50%);
+  z-index: 2; /* выше букв: затемнение плавно гасит их книзу, как в макете */
+}
+
+/* ===================== Череп и наложения ===================== */
+/* Координаты из макета: слой 1915×2014, left −76, top −626 от верха страницы */
+.skull {
+  position: absolute;
+  left: calc(50% - 864 * var(--u) - 76 * var(--u));
+  top: calc(-753 * var(--u));
+  width: calc(1915 * var(--u));
+  height: calc(2014 * var(--u));
+  max-width: none;
+  mix-blend-mode: exclusion;
+  pointer-events: none;
+}
+
+.hero__screen {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(-115 * var(--u));
+  height: calc(1256 * var(--u));
+  background: linear-gradient(180deg, #000 0%, #fff 100%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* ===================== Бегущие красные буквы ===================== */
+.marquee {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Как в Figma: Plus darker. Safari понимает его напрямую,
+     остальные браузеры берут multiply — он выглядит очень близко */
+  mix-blend-mode: multiply;
+  mix-blend-mode: plus-darker;
+}
+
+/* Ширина и смещение — как у картинок в макете (534 и 584 px) */
+.marquee--left  { left: calc(-126 * var(--u));  width: calc(534 * var(--u)); }
+.marquee--right { right: calc(-232 * var(--u)); width: calc(584 * var(--u)); }
+
+.marquee__track {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+.marquee__track img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Три копии картинки, лента сдвигается ровно на одну — бесконечный цикл */
+.marquee--left .marquee__track {
+  top: calc(-460 * var(--u));
+  animation: marquee-up 34s linear infinite;
+}
+
+.marquee--right .marquee__track {
+  top: calc(-722 * var(--u));
+  animation: marquee-down 38s linear infinite;
+}
+
+@keyframes marquee-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-33.3333%); }
+}
+
+@keyframes marquee-down {
+  from { transform: translateY(-33.3333%); }
+  to   { transform: translateY(0); }
+}
+
+/* ===================== Клякса ===================== */
+.ink {
+  position: absolute;
+  z-index: 2;
+  left: calc(586 * var(--u));
+  top: calc(540 * var(--u));
+  width: calc(582 * var(--u));
+  height: calc(701 * var(--u));
+  pointer-events: none;
+}
+
+.ink__img,
+.ink__svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ink__svg { display: none; }
+.ink--fallback .ink__svg { display: block; }
+
+/* ===================== Затемнения ===================== */
+.hero__shade {
+  position: absolute;
+  z-index: 3;
+  left: calc(-111 * var(--u));
+  right: calc(-111 * var(--u));
+  top: calc(94 * var(--u));
+  height: calc(1743 * var(--u));
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0) 4.4%,
+    rgba(0,0,0,.87) 34.1%,
+    #000 43.2%,
+    #000 100%);
+  pointer-events: none;
+}
+
+.hero__fade {
+  position: absolute;
+  z-index: 5;
+  left: calc(-318 * var(--u));
+  right: calc(-318 * var(--u));
+  top: calc(684 * var(--u));
+  height: calc(672 * var(--u));
+  background: linear-gradient(180deg,
+    rgba(1,1,1,0) 7.9%,
+    rgba(1,1,1,.94) 26.7%,
+    var(--black) 31.8%);
+  pointer-events: none;
+}
+
+/* Растягиваем затемнения на всю ширину экрана, а не только сцены */
+.stage .hero__shade,
+.stage .hero__fade {
+  left: calc(50% - 50vw);
+  right: calc(50% - 50vw);
+}
+
+/* ===================== Круг с песнями ===================== */
+.wheel {
+  --k: .8;                 /* общий размер всех песен относительно макета */
+  position: absolute;
+  z-index: 4;
+  left: calc(877 * var(--u));
+  top: calc(1023 * var(--u));
+  width: 0;
+  height: 0;
+}
+
+.wheel__spin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+
+/* Один «луч»: красная полоса со строкой, над ней — название */
+.ray {
+  --ts: 50; --ls: 17; --bt: 11; --bl: 320;   /* размеры из макета, px */
+  --s: 1;                                     /* масштаб: у играющей песни больше */
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  /* масштаб считается от внутреннего конца полосы, поэтому песня растёт наружу */
+  transform: rotate(calc(var(--a) + var(--shift-on, 0deg))) translateX(calc(300 * var(--u))) scale(var(--s)) translateY(-50%);
+  text-align: left;
+  transition:
+    transform .9s cubic-bezier(.22, .8, .24, 1),
+    opacity .7s ease;
+}
+
+/* Пока музыка играет: выбранная песня крупнее, остальные полупрозрачные
+   и раздвигаются влево и вправо (сдвиг --shift считает script.js) */
+.wheel.is-playing .ray {
+  --shift-on: var(--shift, 0deg);
+  opacity: .3;
+}
+.wheel.is-playing .ray:hover { opacity: .7; }
+.wheel.is-playing .ray.is-current {
+  --s: var(--sa, 1.35);   /* увеличение подбирается так, чтобы песня не заходила под плеер */
+  opacity: 1;
+  z-index: 2;
+}
+
+.ray__title {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + .12em);
+  font-size: calc(var(--ts) * var(--k) * var(--u));
+  line-height: .8;
+  white-space: nowrap;
+  color: var(--white);
+  transition: color .18s ease;
+}
+
+.ray__bar {
+  display: flex;
+  align-items: center;
+  height: calc(var(--bt) * var(--k) * var(--u));
+  min-width: calc(var(--bl) * var(--k) * var(--u));
+  background: var(--red);
+}
+
+.ray__line {
+  padding: 0 .45em;
+  font-size: calc(var(--ls) * var(--k) * var(--u));
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--white);
+}
+
+.ray:hover .ray__title { color: var(--red); }
+.wheel.is-playing .ray.is-current:hover .ray__title { color: var(--white); }
+
+.ray:focus-visible { outline: none; }
+.ray:focus-visible .ray__title {
+  outline: 1px solid var(--red);
+  outline-offset: 4px;
+}
+
+/* ===================== Подпись в центре круга ===================== */
+.hub {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: calc(841 * var(--u));
+  transform: translateX(-50%);
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.hub__question {
+  font-size: max(11px, calc(16.6 * var(--u)));
+  line-height: 1.2;
+}
+
+.hub__name {
+  font-size: max(16px, calc(25.65 * var(--u)));
+  line-height: 1.2;
+}
+
+/* ===================== Второй блок: печатная машинка ===================== */
+.story {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 0 20px;
+  background: var(--black);
+  overflow: hidden;
+}
+
+/* Размеры и отступы — из макета (Frame 3) */
+.story__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: max(40px, calc(74 * var(--u)));
+  width: min(100%, max(320px, calc(708 * var(--u))));
+  text-align: center;
+}
+
+.story__block {
+  max-width: 100%;
+  color: var(--white);
+  opacity: 0;
+  transition: opacity 1.1s ease;
+}
+
+.story__block--1 { font-size: max(13px, calc(15.65 * var(--u))); line-height: 1.97; }
+.story__block--2 { font-size: max(15px, calc(18.65 * var(--u))); line-height: 1.1;  width: max(300px, calc(440 * var(--u))); }
+.story__block--3 { font-size: max(17px, calc(22 * var(--u)));    line-height: 1.1;  width: max(300px, calc(582 * var(--u))); }
+.story__block--4 { font-size: max(24px, calc(35.65 * var(--u))); line-height: .95; width: max(300px, calc(456 * var(--u))); }
+
+/* «Возраст» фразы: 0 — печатается сейчас, дальше — всё тусклее */
+.story__block[data-age="0"] { opacity: 1; }
+.story__block[data-age="1"] { opacity: .55; }
+.story__block[data-age="2"] { opacity: .3; }
+.story__block[data-age="3"] { opacity: .15; }
+
+/* Буквы появляются по одной */
+.story__block .ch { opacity: 0; }
+.story__block .ch.is-on { opacity: 1; }
+
+/* Каретка печатной машинки */
+/* Нулевая ширина — каретка не сдвигает ещё не напечатанный текст */
+.caret {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: .9em;
+  vertical-align: -.08em;
+}
+
+.caret::after {
+  content: "";
+  position: absolute;
+  left: .05em;
+  top: 0;
+  width: .06em;
+  height: 100%;
+  background: var(--red);
+  animation: caret-blink 1s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  50% { opacity: 0; }
+}
+
+/* Подсказка «листай» — когда можно открыть следующую фразу */
+.story__hint {
+  position: absolute;
+  left: 50%;
+  bottom: max(24px, calc(40 * var(--u)));
+  transform: translateX(-50%);
+  font-size: max(12px, calc(14 * var(--u)));
+  letter-spacing: .08em;
+  color: rgba(255, 255, 255, .45);
+  opacity: 0;
+  transition: opacity .5s ease;
+  pointer-events: none;
+}
+
+.story__hint span {
+  display: inline-block;
+  animation: hint-bob 1.6s ease-in-out infinite;
+}
+
+.story.can-next .story__hint { opacity: 1; }
+
+@keyframes hint-bob {
+  50% { transform: translateY(4px); }
+}
+
+.after {
+  min-height: 100vh;
+  background: var(--black);
+}
+
+/* ===================== Мобильные ===================== */
+@media (max-width: 760px) {
+  :root { --u: calc(100vw / 1000); }
+
+  .nav {
+    justify-content: flex-start;
+    gap: 22px;
+    padding: 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+
+  .hero { height: calc(1060 * var(--u)); }
+
+  .marquee--left  { left: calc(-260 * var(--u)); }
+  .marquee--right { right: calc(-330 * var(--u)); }
+}
+
+/* ===================== Меньше движения ===================== */
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track { animation: none; }
+  .ray { transition: opacity .3s ease; }
+  .caret::after, .story__hint span { animation: none; }
+}
