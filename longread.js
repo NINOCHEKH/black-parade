@@ -496,6 +496,8 @@
     </svg>`;
   }
 
+  window.marcherSVG = marcherSVG;   // те же фигурки идут в подвале (finale.js)
+
   if (track) {
     // два одинаковых ряда подряд — лента бесконечно едет по экрану
     const kinds = ["flag", "drum", "horn", "drum", "horn", "drum", "horn", "drum"];
@@ -687,21 +689,9 @@
   const cNum = document.getElementById("countNum");
   const cNoise = document.getElementById("countNoise");
   const cFlashes = document.getElementById("countFlashes");
-  const cLine = document.getElementById("countLine");
+  const cWall = document.getElementById("countWall");
+  const cParas = cWall ? Array.from(cWall.querySelectorAll("p")) : [];
   const nctx = cNoise && cNoise.getContext("2d");
-  // что он говорит на каждой цифре — всё тяжелее
-  const COUNT_LINES = {
-    10: "Говорят, перед концом вся жизнь проносится перед глазами.",
-    9: "Моя не проносится. Она тянется, как очередь в коридоре поликлиники.",
-    8: "И в этой очереди почти нет дней, за которые мне не стыдно.",
-    7: "Я молчал, когда нужно было говорить, и говорил, когда лучше было промолчать.",
-    6: "Люди уставали от меня. Я замечал это — и делал вид, что не замечаю.",
-    5: "Я сам отталкивал тех, кто был рядом, а потом жаловался, что остался один.",
-    4: "Я не был хорошим человеком.",
-    3: "Хуже того — я был никаким. Таких не ненавидят. Таких просто не помнят.",
-    2: "Меня забудут быстрее, чем из этой палаты выветрится запах хлорки.",
-    1: "Наверное, это честно.",
-  };
   // признания вспыхивают вокруг — ступенями, от тихих к невыносимым
   const CONFESSIONS = [
     ["я не перезвонил", "я сказал «потом»", "я опять опоздал", "я забыл её день рождения"],
@@ -709,8 +699,8 @@
     ["я не был хорошим сыном", "я делал больно нарочно", "меня не за что вспомнить", "я никого не удержал"],
     ["поздно", "никто не придёт", "прости", "уже ничего не исправить"],
   ];
-  // сколько секунд держится каждая цифра: в начале медленно, к концу всё быстрее
-  const COUNT_STEP = { 10: 2.9, 9: 2.9, 8: 2.6, 7: 3.0, 6: 2.6, 5: 2.5, 4: 2.2, 3: 2.0, 2: 2.3, 1: 1.7, 0: 0.9 };
+  // сколько секунд держится каждая цифра: медленно, чтобы полотно успевало проступать; к концу быстрее
+  const COUNT_STEP = { 10: 4.2, 9: 4.0, 8: 3.8, 7: 3.6, 6: 3.4, 5: 3.2, 4: 3.0, 3: 2.8, 2: 2.6, 1: 2.4, 0: 1.0 };
   let cVisible = false, cNoiseLevel = 0, cWhite = false, nextFlashAt = 0, noiseImg = null;
   let cState = "wait";            // wait → run → done
   let cNum0 = 10, cStepEnd = 0, cProgress = 0, cLockY = 0, cLastY = window.scrollY;
@@ -724,10 +714,29 @@
     if (cNoiseOver) { cNoiseOver.width = 240; cNoiseOver.height = 135; }
   }
 
-  function setLine(text) {
-    if (cLine.textContent === text) return;
-    cLine.classList.add("is-swap");
-    setTimeout(() => { cLine.textContent = text; cLine.classList.remove("is-swap"); }, 300);
+  // полотно подгоняется под экран: самый крупный шрифт, при котором текст помещается целиком
+  function fitWall() {
+    if (!cWall) return;
+    let lo = 9, hi = 26;
+    for (let i = 0; i < 9; i++) {
+      const mid = (lo + hi) / 2;
+      cWall.style.fontSize = mid + "px";
+      if (cWall.scrollWidth > cWall.clientWidth + 1 || cWall.scrollHeight > cWall.clientHeight + 1) hi = mid; else lo = mid;
+    }
+    cWall.style.fontSize = lo.toFixed(2) + "px";
+  }
+
+  // абзацы проступают по очереди: текущий — ярко, прошедшие — тускло, будущие — в темноте
+  let cParaShown = -2;
+  function lightWall(p) {
+    const n = cParas.length;
+    const cur = cState === "run" ? Math.min(n - 1, Math.floor(p * n * 1.04)) : (cState === "done" ? n : -1);
+    if (cur === cParaShown) return;
+    cParaShown = cur;
+    cParas.forEach((el, i) => {
+      el.classList.toggle("is-current", i === cur);
+      el.classList.toggle("is-past", i < cur);
+    });
   }
 
   /* --- перекидные цифры --- */
@@ -773,13 +782,14 @@
   function showNumber(n) {
     cNum.textContent = String(n);
     setClock(n, true);
-    setLine(COUNT_LINES[n] || "");
   }
 
   function resetCountdown() {
     cState = "wait"; cNum0 = 10; cProgress = 0; cElapsedBefore = 0; cWhite = false;
     cScene.classList.remove("is-white", "is-done");
-    cNum.textContent = "10"; cLine.textContent = ""; cFlashes.innerHTML = "";
+    cNum.textContent = "10"; cFlashes.innerHTML = "";
+    lightWall(0);
+    clockStage.style.setProperty("--cg", "0");
     setClock(10, false);
     clockArriving = false; clockArrive = 0;
     clockStage.style.setProperty("--ca", "0");
@@ -794,9 +804,10 @@
     setClock(10, false);
     // часы выплывают из темноты; первая цифра держится, пока они не подъедут
     clockArriving = true; clockArriveStart = performance.now();
-    cStepEnd = performance.now() + (COUNT_STEP[10] + 1.6) * 1000;
+    cStepEnd = performance.now() + COUNT_STEP[10] * 1000;
     cNum.textContent = "10";
-    setTimeout(() => { if (cState === "run") setLine(COUNT_LINES[10]); }, 1400);
+    fitWall();
+    lightWall(0);
   }
 
   function finishCountdown() {
@@ -808,6 +819,8 @@
     clockArriving = false; clockArrive = 1;
     clockStage.style.setProperty("--ca", "1");
     cScene.classList.add("is-white", "is-done");
+    clockStage.style.setProperty("--cg", "1");
+    lightWall(1);
     cScene.style.setProperty("--noise", "0");
     cFlashes.innerHTML = "";
   }
@@ -825,8 +838,11 @@
     }
     const inStep = Math.max(0, COUNT_STEP[cNum0] - Math.max(0, (cStepEnd - now) / 1000));
     cProgress = clamp01((cElapsedBefore + inStep) / COUNT_TOTAL);
-    cNoiseLevel = Math.pow(cProgress, 1.4);
+    cNoiseLevel = Math.pow(cProgress, 1.6);
     cScene.style.setProperty("--noise", cNoiseLevel.toFixed(3));
+    // часы растут весь отсчёт, а не сразу
+    clockStage.style.setProperty("--cg", (reduce ? 1 : 1 - Math.pow(1 - cProgress, 1.6)).toFixed(4));
+    lightWall(cProgress);
   }
 
   // пока идёт отсчёт, страница стоит; прокрутка вверх отпускает и сбрасывает отсчёт
@@ -870,12 +886,12 @@
     const el = document.createElement("span");
     el.className = "flash" + (Math.random() < 0.2 + 0.4 * cProgress ? " flash--red" : "");
     el.textContent = tier[(Math.random() * tier.length) | 0];
-    // вокруг цифры, не поверх неё и не поверх строки внизу
-    let x, y;
-    do { x = Math.random(); y = Math.random() * 0.8; } while (Math.abs(x - 0.45) < 0.3 && Math.abs(y - 0.42) < 0.3);
-    el.style.left = (x * 82 + 2) + "%";
-    el.style.top = (y * 86 + 4) + "%";
-    const want = 13 + Math.random() * (14 + 26 * cNoiseLevel);
+    // в просвете между колонками текста — над часами и под ними, чтобы не закрывать полотно
+    const x = 0.32 + Math.random() * 0.22;
+    const y = Math.random() < 0.5 ? 0.04 + Math.random() * 0.14 : 0.8 + Math.random() * 0.12;
+    el.style.left = (x * 100) + "%";
+    el.style.top = (y * 100) + "%";
+    const want = 13 + Math.random() * (8 + 12 * cNoiseLevel);
     const fit = (cFlashes.clientWidth * 0.9) / (el.textContent.length * 0.52);
     el.style.fontSize = Math.min(want, fit).toFixed(1) + "px";
     el.style.setProperty("--life", (0.7 + Math.random() * 0.9).toFixed(2) + "s");
@@ -888,8 +904,9 @@
   function drawCountdown(now) {
     tickCountdown(now);
     if (clockArriving) {
-      clockArrive = reduce ? 1 : clamp01((now - clockArriveStart) / 3400);
-      const e = 1 - Math.pow(1 - clockArrive, 3);
+      // свет проступает медленно, из ниоткуда
+      clockArrive = reduce ? 1 : clamp01((now - clockArriveStart) / 4500);
+      const e = clockArrive * clockArrive * (3 - 2 * clockArrive);
       clockStage.style.setProperty("--ca", e.toFixed(4));
       if (clockArrive >= 1) clockArriving = false;
     }
@@ -909,7 +926,7 @@
     clockStage.style.setProperty("--shy", ((Math.random() - 0.5) * g * 8).toFixed(1));
     if (!reduce && now > nextFlashAt && cNoiseLevel > 0.03) {
       spawnFlash();
-      nextFlashAt = now + (1200 - 1120 * cNoiseLevel) * (0.5 + Math.random());
+      nextFlashAt = now + (2200 - 1700 * cNoiseLevel) * (0.5 + Math.random());
     }
   }
 
@@ -922,6 +939,7 @@
     drawCountdown(now);
   }
   sizePShards(); sizeNoise();
+  window.addEventListener("resize", () => { if (cState !== "wait") fitWall(); });
   window.addEventListener("resize", sizePShards);
   requestAnimationFrame(sceneLoop);
 

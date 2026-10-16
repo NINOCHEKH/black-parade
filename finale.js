@@ -13,6 +13,7 @@
   const askBtn = document.getElementById("askBtn");
   const question = document.getElementById("question");
   const yesBtn = document.getElementById("yesBtn");
+  const noBtn = document.getElementById("noBtn");
   const thanks = document.getElementById("thanks");
   const readAgain = document.getElementById("readAgain");
   if (!sec || !scene || !vortex || !source) return;
@@ -69,7 +70,8 @@
   let last = performance.now();
   function frame(now) {
     requestAnimationFrame(frame);
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const realDt = (now - last) / 1000;
+    const dt = Math.min(0.05, realDt);
     last = now;
     if (!visible) return;
     const t = now / 1000;
@@ -103,8 +105,8 @@
     });
 
     // кнопка появляется, когда текст побыл на экране (считаем, только пока сцена видна хотя бы наполовину)
-    if (vortexActive) seenTime += dt;
-    if (askBtn.hidden && seenTime > (reduce ? 3 : 14)) {
+    if (vortexActive) seenTime += Math.min(0.5, realDt);   // настоящее время, даже если кадры редкие
+    if (askBtn.hidden && seenTime > 3) {
       askBtn.hidden = false;
       requestAnimationFrame(() => askBtn.classList.add("is-shown"));
     }
@@ -133,8 +135,9 @@
     later(reduce ? 0 : 4300, () => { question.classList.add("is-ask"); yesBtn.focus({ preventScroll: true }); });
   }
 
+  let answered = false;
   function closeQuestion() {
-    if (yesCount >= 3) return;
+    if (answered) return;
     timers.forEach(clearTimeout); timers.length = 0;
     question.classList.remove("is-open", "is-l1", "is-l2", "is-ask");
     document.documentElement.style.overflow = "";
@@ -171,18 +174,20 @@
     };
   }
 
-  function thank() {
+  // его последние слова — после «да» или после «нет»; потом лонгрид растворяется
+  function farewell(main, sub) {
+    answered = true;
     question.classList.add("is-thanks");
     thanks.innerHTML = "";
     const a = document.createElement("span");
-    a.textContent = "Спасибо.";
+    a.textContent = main;
     thanks.appendChild(a);
     later(reduce ? 0 : 2200, () => {
       const b = document.createElement("span");
       b.style.display = "block";
       b.style.fontSize = ".45em";
       b.style.marginTop = ".8em";
-      b.textContent = "Теперь я могу идти.";
+      b.textContent = sub;
       b.style.opacity = "0";
       b.style.transition = "opacity 1.4s ease";
       thanks.appendChild(b);
@@ -207,19 +212,39 @@
   }
 
   yesBtn.addEventListener("click", () => {
-    if (yesMoving || yesCount >= 3) return;
+    if (yesMoving || answered) return;
     yesCount++;
     if (yesCount < 3) crawlAway();
-    else thank();
+    else farewell("Спасибо.", "Теперь я могу идти.");
+  });
+  noBtn.addEventListener("click", () => {
+    if (answered) return;
+    farewell("Каждый читатель видит меня по\u2011разному.", "Ты увидел меня таким…");   // неразрывный дефис
   });
 
   askBtn.addEventListener("click", openQuestion);
   document.addEventListener("keydown", (e) => {
     if (question.hidden) return;
     if (e.key === "Escape") { e.preventDefault(); closeQuestion(); }
-    else if (e.key === "Tab") { e.preventDefault(); yesBtn.focus(); }   // фокус не уходит из вопроса
+    else if (e.key === "Tab") {                                          // фокус ходит только между «да» и «нет»
+      e.preventDefault();
+      (document.activeElement === yesBtn ? noBtn : yesBtn).focus();
+    }
   });
   readAgain.addEventListener("click", () => location.reload());
+
+  /* ---------- подвал: парад слева направо ---------- */
+  const creditsTrack = document.getElementById("creditsTrack");
+  if (creditsTrack && window.marcherSVG) {
+    // ряд должен быть шире любого экрана, иначе в ленте будет дыра
+    const kinds = [];
+    for (let i = 0; i < 30; i++) kinds.push(i % 10 === 0 ? "flag" : i % 2 ? "drum" : "horn");
+    const row = kinds.map((k) => window.marcherSVG(k)).join("");
+    creditsTrack.innerHTML = row + row;
+    creditsTrack.querySelectorAll(".marcher").forEach((m, i) => {
+      m.querySelectorAll(".leg-a, .leg-b, .body").forEach((g) => { g.style.animationDelay = (-(i % 3) * 0.06) + "s"; });
+    });
+  }
 
   measure();
   onScroll();

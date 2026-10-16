@@ -1543,16 +1543,43 @@ button {
 .countdown__noise--over {
   z-index: 3;
   mix-blend-mode: screen;
-  opacity: calc(var(--noise) * .22) !important;
+  opacity: calc(var(--noise) * .14) !important;
 }
 .countdown__noise {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: calc(var(--noise) * .85);
+  opacity: calc(var(--noise) * .38);
   transition: opacity .3s ease;
 }
+
+/* --- полотно текста: две колонки по бокам от часов --- */
+.count-wall {
+  position: absolute;
+  inset: 5% 4% 5%;
+  z-index: 1;
+  column-count: 2;
+  column-gap: calc(min(28vw, 380px) + 6vw);
+  column-fill: auto;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #fff;
+  text-align: justify;
+  hyphens: auto;
+  pointer-events: none;
+}
+.count-wall p {
+  margin: 0 0 .9em;
+  opacity: 0;
+  filter: blur(5px);
+  transition: opacity 3.2s ease, filter 3.2s ease, text-shadow 3.2s ease;
+}
+.count-wall p.is-past { opacity: .34; filter: blur(0); }
+.count-wall p.is-current { opacity: 1; filter: blur(0); text-shadow: 0 0 .7em rgba(255, 255, 255, .35); }
+.countdown-scene.is-white .count-wall { opacity: 0; transition: opacity .2s ease; }
+
 /* --- 3D-часы --- */
 .clock-stage {
   --ca: 0;                               /* 0 — в темноте и далеко, 1 — прибыли (ставит скрипт) */
@@ -1563,8 +1590,9 @@ button {
   perspective: 1500px;
   transform: translate(calc(var(--shx, 0) * 1px), calc(var(--shy, 0) * 1px));
 }
+/* --ca — проступает из темноты (свет), --cg — растёт весь отсчёт: из глубины к зрителю */
 .clock {
-  --cw: min(58vw, calc((100svh - var(--header-h) - 250px) * 1.55), 760px);
+  --cw: min(28vw, calc((100svh - var(--header-h) - 260px) * .85), 380px);
   --chh: calc(var(--cw) * .6);
   --cd: calc(var(--cw) * .3);
   position: relative;
@@ -1572,9 +1600,9 @@ button {
   height: var(--chh);
   transform-style: preserve-3d;
   transform:
-    translateZ(calc((1 - var(--ca)) * -2600px))
-    rotateX(calc(14deg + (1 - var(--ca)) * 26deg))
-    rotateY(calc(-22deg - (1 - var(--ca)) * 40deg));
+    translateZ(calc((1 - var(--cg, 0)) * -1900px - (1 - var(--ca)) * 400px))
+    rotateX(calc(12deg + (1 - var(--cg, 0)) * 14deg))
+    rotateY(calc(-18deg - (1 - var(--cg, 0)) * 20deg));
 }
 .clock-sway {
   position: absolute;
@@ -1690,15 +1718,15 @@ button {
   top: 50%;
   width: min(120vw, 1400px);
   height: min(90vh, 900px);
-  transform: translate(-50%, -50%);
-  background: radial-gradient(ellipse at center, rgba(220, 230, 255, .14) 0%, rgba(220, 230, 255, .05) 35%, rgba(0,0,0,0) 65%);
-  opacity: var(--ca);
+  background: radial-gradient(ellipse at center, rgba(220, 230, 255, .16) 0%, rgba(220, 230, 255, .05) 32%, rgba(0,0,0,0) 62%);
+  opacity: calc(var(--ca) * (.35 + .65 * var(--cg, 0)));
+  transform: translate(-50%, -50%) scale(calc(.5 + .5 * var(--cg, 0)));
   pointer-events: none;
 }
 .clock-veil {
   position: absolute;
-  inset: -40vh -40vw;
-  background: #000;
+  inset: -20% -15%;
+  background: radial-gradient(ellipse at center, #000 45%, rgba(0,0,0,0) 72%);
   opacity: calc(1 - var(--ca));
   pointer-events: none;
 }
@@ -1711,25 +1739,7 @@ button {
   white-space: nowrap;
 }
 
-.countdown__line {
-  position: absolute;
-  left: 50%;
-  bottom: 7%;
-  z-index: 5;
-  max-width: min(92%, 780px);
-  margin: 0;
-  padding: .45em .9em;
-  transform: translateX(-50%);
-  text-align: center;
-  font-size: max(16px, calc(24 * var(--u)));
-  line-height: 1.3;
-  color: #fff;
-  background: #000;
-  transition: opacity .4s ease;
-}
-.countdown__line:empty { opacity: 0; }
-.countdown__line.is-swap { opacity: 0; }
-.countdown-scene.is-white .countdown__line { opacity: 0; }
+
 .countdown__flashes { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
 .flash {
   position: absolute;
@@ -2058,6 +2068,7 @@ button {
   opacity: 0;
   transition: opacity 1s ease, background .2s ease, color .2s ease;
 }
+.question__answers { display: flex; gap: 28px; justify-content: center; }
 .question.is-ask .question__yes { opacity: 1; }
 .question__yes:hover, .question__yes:focus-visible { background: #fff; color: #000; outline: none; }
 .question__thanks {
@@ -2072,7 +2083,7 @@ button {
   opacity: 0;
   transition: opacity 1.4s ease;
 }
-.question.is-thanks .question__text, .question.is-thanks .question__yes { opacity: 0; transition: opacity .8s ease; pointer-events: none; }
+.question.is-thanks .question__text, .question.is-thanks .question__answers { opacity: 0; transition: opacity .8s ease; pointer-events: none; }
 .question.is-thanks .question__thanks { opacity: 1; }
 .question.is-fading { background-color: rgba(0, 0, 0, 0); pointer-events: none; }
 .question.is-fading .question__thanks { opacity: 0; transition-delay: 1.6s; }
@@ -2123,8 +2134,45 @@ html.is-gone body { background: #000; }
   letter-spacing: .1em;
 }
 .sources__again:hover { color: var(--red); border-color: var(--red); }
-html.is-vanishing .sources { opacity: 0; }
-html.is-gone .sources { animation: sources-in 2.4s ease both; min-height: 100vh; }
+/* --- красный подвал: парад идёт слева направо, внизу авторы --- */
+.credits {
+  position: relative;
+  overflow: hidden;
+  background-color: #AE0C0C;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .32 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  color: #fff;
+}
+.credits__march {
+  position: relative;
+  height: max(170px, calc(260 * var(--u)));
+}
+.credits__track {
+  position: absolute;
+  left: 0;
+  bottom: 22%;
+  height: 70%;
+  display: flex;
+  align-items: flex-end;
+  gap: max(18px, calc(34 * var(--u)));
+  animation: credits-march 30s linear infinite;
+  will-change: transform;
+}
+/* лента из двух одинаковых рядов: сдвигаем на половину — бесконечно, слева направо */
+@keyframes credits-march { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+.credits__ground { position: absolute; left: 0; right: 0; bottom: 0; height: 22%; background: linear-gradient(180deg, #0b0b0b 0 55%, rgba(11,11,11,0)); }
+.credits__names {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .4em 2.4em;
+  margin: 0;
+  padding: max(22px, calc(34 * var(--u))) 20px max(34px, calc(50 * var(--u)));
+  font-size: max(16px, calc(22 * var(--u)));
+  letter-spacing: .04em;
+}
+html.is-vanishing .sources, html.is-vanishing .credits { opacity: 0; }
+html.is-gone .credits { animation: sources-in 2.4s ease .6s both; }
+html.is-gone .sources { animation: sources-in 2.4s ease both; }
 @keyframes sources-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
 /* ===================== Липкая шапка и текущая глава ===================== */
@@ -2140,6 +2188,10 @@ html.is-gone .sources { animation: sources-in 2.4s ease both; min-height: 100vh;
   .pcard-wrap--l, .pcard-wrap--r { left: 50%; right: auto; transform: translateX(-50%); }
   .pcard-wrap--l .pcard { --ry: 10deg; }
   .pcard-wrap--r .pcard { --ry: -10deg; }
+  .countdown-scene { place-items: start center; }
+  .clock-stage { margin-top: 18px; }
+  .clock { --cw: min(56vw, 240px); }
+  .count-wall { inset: auto 16px 4% 16px; height: 54%; column-count: 1; column-gap: 0; }
   .love-stage { --ph: min(calc(100svh - var(--header-h) - 430px), 380px); align-items: start; padding-top: 8px; }
   .love-col { top: auto; height: 40%; width: auto; left: 16px; right: 16px; }
   .love-col__inner { font-size: 16px; }
@@ -2189,12 +2241,29 @@ html.is-gone .sources { animation: sources-in 2.4s ease both; min-height: 100vh;
 .film__vignette {
   inset: 0;
   background:
-    radial-gradient(ellipse 115% 95% at 50% 50%, rgba(0,0,0,0) 48%, rgba(0,0,0,.32) 74%, rgba(0,0,0,.78) 100%);
+    /* бока темнее, чем верх и низ */
+    linear-gradient(90deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,.28) 7%, rgba(0,0,0,0) 20%, rgba(0,0,0,0) 80%, rgba(0,0,0,.28) 93%, rgba(0,0,0,.62) 100%),
+    radial-gradient(ellipse 105% 92% at 50% 50%, rgba(0,0,0,0) 42%, rgba(0,0,0,.38) 70%, rgba(0,0,0,.85) 100%);
   animation: film-flicker 5.3s steps(1) infinite;
 }
 @keyframes film-flicker {
   0% { opacity: 1; } 11% { opacity: .9; } 12% { opacity: 1; }
   43% { opacity: .94; } 44% { opacity: 1; } 71% { opacity: .86; } 72% { opacity: .97; } 73% { opacity: 1; }
+}
+/* скруглённые края экрана и блик выпуклого стекла */
+.film__crt {
+  inset: 0;
+  border-radius: 4.5vmin / 5.5vmin;
+  box-shadow: 0 0 0 30vmax #000, inset 0 0 6vmin rgba(0, 0, 0, .55), inset 0 0 1.2vmin rgba(0, 0, 0, .7);
+  background: radial-gradient(ellipse 60% 45% at 32% 22%, rgba(255, 255, 255, .045), rgba(255, 255, 255, 0) 70%);
+}
+/* выпуклое стекло: центр светлее и «ближе», к краям — глубже и темнее */
+.film__bulge {
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 62% at 50% 48%, rgba(255, 255, 255, .035), rgba(255, 255, 255, 0) 60%),
+    radial-gradient(ellipse 140% 120% at 50% 50%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .25) 80%, rgba(0, 0, 0, .45) 100%);
+  mix-blend-mode: normal;
 }
 .film__scratch {
   top: 0;
@@ -2239,7 +2308,7 @@ html.is-gone .sources { animation: sources-in 2.4s ease both; min-height: 100vh;
   .ray { transition: opacity .3s ease; }
   .caret::after, .story__hint span { animation: none; }
   [data-reveal] { transition: none; opacity: 1; transform: none; }
-  .marcher *, .tv, .tv-screen__track, .tv-glow, .pcard, .flash, .sms, .sms-caret { animation: none !important; }
+  .marcher *, .tv, .tv-screen__track, .tv-glow, .pcard, .flash, .sms, .sms-caret, .credits__track { animation: none !important; }
   .tv-screen__content { transform: none; filter: none; }
   html.is-vanishing .header, html.is-vanishing .hero, html.is-vanishing .story, html.is-vanishing .chapters { animation-duration: .01s; }
 }
