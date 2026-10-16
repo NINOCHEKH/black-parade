@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Old Standard TT — запасной шрифт, если Broadsheet не подключён -->
-  <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&family=Caveat:wght@500;700&family=PT+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -120,9 +120,441 @@
     <p class="story__hint" aria-hidden="true">листай <span>↓</span></p>
   </section>
 
-  <!-- ===== Дальше — следующий блок (картинки и текст из макета), пока пусто ===== -->
-  <section class="after" id="after"></section>
+  <!-- =========================================================
+       ГЛАВЫ. Порядок и якоря — как в меню.
+       data-type-group — внутри строки data-type печатаются по очереди, когда блок появился на экране
+       data-reveal — плавно проявляется
+       track-chip — включает песню в плеере
+       ========================================================= -->
+  <main class="chapters">
+
+    <!-- ===== I. МЕРТВ =====
+         В темноте вращается папка «личное дело». Клик — ложится на стол и раскрывается под кругом света,
+         ещё клик по папке — закрывается. Дальше по скроллу папка рассыпается в пыль, остаётся текст,
+         а потом всё резко становится красным (переход к «Параду»). -->
+    <section class="chapter chapter--dead" id="dead" aria-labelledby="t-dead">
+      <div class="dead-scene" id="deadScene">
+        <header class="chapter__head chapter__head--compact">
+          <span class="chapter__num">глава I</span>
+          <h2 class="chapter__title" id="t-dead">МЕРТВ</h2>
+          <button class="track-chip" type="button" data-song="Dead!"><span class="track-chip__icon" aria-hidden="true"></span>Dead! <span class="track-chip__time">— 3:16</span></button>
+        </header>
+
+        <div class="desk" aria-hidden="true"></div>
+
+        <div class="stage3d" id="stage3d">
+          <div class="folder-shadow" aria-hidden="true"></div>
+          <div class="folder" id="folder" role="button" tabindex="0" aria-label="Личное дело пациента № 7 — открыть">
+            <!-- задняя доска (правая половина) -->
+            <div class="board board--back">
+              <div class="face face--top inner-right">
+                <div class="sleeve" aria-hidden="true"></div>
+              </div>
+              <div class="face face--bottom folder-back"><span>№ 7</span></div>
+              <div class="edge edge--right"></div>
+              <div class="edge edge--top"></div>
+              <div class="edge edge--bottom"></div>
+              <div class="edge edge--spine"></div>
+            </div>
+
+            <!-- диск -->
+            <div class="disc3d">
+              <div class="disc3d__shadow" aria-hidden="true"></div>
+              <button class="disc" type="button" id="disc" aria-label="Диск «история болезни» — включить Dead!">
+                <span class="disc__body">
+                  <svg class="disc__ink" viewBox="0 0 200 200" aria-hidden="true">
+                    <defs>
+                      <filter id="marker" x="-10%" y="-10%" width="120%" height="120%">
+                        <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="4" result="n"/>
+                        <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/>
+                      </filter>
+                    </defs>
+                    <g transform="rotate(-9 100 100)">
+                      <text x="100" y="50" text-anchor="middle">история</text>
+                      <text x="104" y="76" text-anchor="middle">болезни</text>
+                      <path d="M60 83 C 88 79, 118 80, 148 75"/>
+                    </g>
+                    <text class="disc__small" x="100" y="162" text-anchor="middle" transform="rotate(6 100 100)">№7 · пал. 4</text>
+                  </svg>
+                </span>
+                <span class="disc__edge" aria-hidden="true"></span>
+                <span class="disc__sheen" aria-hidden="true"></span>
+              </button>
+            </div>
+
+            <!-- обложка на петле: снаружи «личное дело», внутри просто картон -->
+            <div class="hinge">
+              <div class="board board--cover">
+                <div class="face face--top cover">
+                  <span class="cover__clip" aria-hidden="true"></span>
+                  <img class="cover__photo" src="assets/xray.webp" alt="">
+                  <p class="cover__kicker">медицинская карта стационарного больного</p>
+                  <p class="cover__title">ЛИЧНОЕ ДЕЛО</p>
+                  <p class="cover__sub">пациент № 7</p>
+                  <span class="cover__stamp">палата 4</span>
+                </div>
+                <div class="face face--bottom inner-left"></div>
+                <div class="edge edge--right"></div>
+                <div class="edge edge--top"></div>
+                <div class="edge edge--bottom"></div>
+              </div>
+            </div>
+
+            <!-- кармашек с документами: отдельный слой поверх раскрытой обложки (так клики работают надёжно) -->
+            <div class="pocket-layer">
+              <div class="pocket">
+                <button class="doc doc--record" type="button" data-doc="record" aria-label="Выписка — прочитать">
+                  <span class="doc__paper">
+                    <span class="doc__tab">выписка</span>
+                    <span class="doc__title">Медицинская карта № 7</span>
+                    <span class="doc__lines" aria-hidden="true"></span>
+                  </span>
+                </button>
+                <button class="doc doc--xray" type="button" data-doc="xray" aria-label="Снимок — посмотреть">
+                  <span class="doc__paper">
+                    <span class="doc__tab">снимок</span>
+                    <img src="assets/xray.webp" alt="">
+                  </span>
+                </button>
+                <button class="doc doc--note" type="button" data-doc="note" aria-label="Записка — прочитать">
+                  <span class="doc__paper">
+                    <span class="doc__tab">записка</span>
+                    <span class="doc__hand">мне сказали что у меня что-то в организме..</span>
+                  </span>
+                </button>
+                <div class="pocket__front" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- круг света, как от лампочки над столом -->
+        <div class="light" aria-hidden="true">
+          <div class="light__dark light__dark--idle"></div>
+          <div class="light__dark light__dark--lit"></div>
+          <div class="light__pool"></div>
+        </div>
+        <canvas class="dust" id="dust" aria-hidden="true"></canvas>
+
+        <!-- то, что остаётся, когда папка рассыпалась -->
+        <div class="remains" id="remains">
+          <p class="remains__small">Всё это — бумага. Её можно потерять, сжечь, сдать в архив.</p>
+          <p class="remains__big">Но есть то, что я до сих пор вспоминаю с&nbsp;теплотой.</p>
+          <p class="remains__small remains__small--late">Барабаны. Солнце в витринах. Отцовские плечи.</p>
+        </div>
+
+        <!-- фильтр «рассыпания»: шум съедает папку по мере скролла -->
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+          <filter id="dissolve" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="11" result="noise"/>
+            <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="noiseA"/>
+            <feComponentTransfer in="noiseA" result="mask">
+              <feFuncA id="dissolveFunc" type="linear" slope="14" intercept="8"/>
+            </feComponentTransfer>
+            <feComposite in="SourceGraphic" in2="mask" operator="in"/>
+          </filter>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Полные версии документов: показываются при клике -->
+    <template id="doc-record">
+      <article class="sheet sheet--record">
+        <header class="sheet__head">
+          <p>Городская клиническая больница · отделение онкологии</p>
+          <h3>Медицинская карта стационарного больного № 7</h3>
+        </header>
+        <dl class="sheet__fields">
+          <div><dt>Палата</dt><dd>4</dd></div>
+          <div><dt>Дата поступления</dt><dd>14 октября</dd></div>
+          <div><dt>Возраст</dt><dd>не указан</dd></div>
+          <div><dt>Жалобы</dt><dd>слабость, бессонница, «шум барабанов по ночам»</dd></div>
+          <div><dt>Диагноз</dt><dd><span class="redacted">██████████████</span></dd></div>
+          <div><dt>Назначено</dt><dd>наблюдение, обезболивание по требованию</dd></div>
+        </dl>
+        <p class="sheet__note"><b>Примечание лечащего врача:</b> пациент спокоен, много пишет, от бесед с психологом отказывается. Просит не задёргивать шторы и не выключать свет в коридоре. Посетители — по вторникам.</p>
+        <p class="sheet__sign">Лечащий врач ____________ <span class="sheet__stamp">копия верна</span></p>
+      </article>
+    </template>
+
+    <template id="doc-xray">
+      <article class="sheet sheet--xray">
+        <img src="assets/xray.webp" alt="Рентгеновский снимок грудной клетки">
+        <span class="xray__mark xray__mark--r">R</span>
+        <span class="xray__mark xray__mark--id">№7 · 14.10</span>
+        <p class="xray__caption">Снимок приложен к карте. Красным — то, о чём мне так и не сказали вслух.</p>
+      </article>
+    </template>
+
+    <template id="doc-note">
+      <article class="sheet sheet--note">
+        <p>мне сказали что у меня что-то в организме..</p>
+        <p>Врач говорил долго и мягко, как говорят с ребёнком, который разбил что-то очень дорогое. Слов я не запомнил. Запомнил, как он снял очки и протёр их, хотя они были чистыми.</p>
+        <p>Потом была палата. Белый потолок, на котором я выучил каждую трещину, как карту города, куда уже не поеду.</p>
+        <p>Мир не остановился. За окном кто-то парковался, кто-то ругался по телефону, кто-то смеялся. А я лежал и думал: неужели вот так — и всё?</p>
+        <p class="sheet__ps">P.S. Если найдёшь это — не выбрасывай. Пусть останется хоть где-то.</p>
+      </article>
+    </template>
+
+    <!-- Окно для чтения документа -->
+    <div class="doc-viewer" id="docViewer" role="dialog" aria-modal="true" aria-label="Документ" hidden>
+      <div class="doc-viewer__backdrop" data-close></div>
+      <div class="doc-viewer__inner">
+        <div class="doc-viewer__card" id="docCard"></div>
+        <button class="doc-viewer__close" type="button" data-close>вложить обратно</button>
+      </div>
+    </div>
+
+    <!-- ===== II. ПАРАД =====
+         Сцена закреплена: в центре телевизор с маршем, по бокам по очереди появляются объёмные карточки
+         и рассыпаются. Красный фон тускнеет, в конце телевизор выключается. -->
+    <section class="chapter chapter--parade" id="parade" aria-labelledby="t-parade">
+      <div class="parade-scene" id="paradeScene">
+        <div class="parade-dim" aria-hidden="true"></div>
+        <header class="chapter__head chapter__head--compact">
+          <span class="chapter__num">глава II</span>
+          <h2 class="chapter__title" id="t-parade">ПАРАД</h2>
+          <button class="track-chip" type="button" data-song="Welcome to the Black Parade"><span class="track-chip__icon" aria-hidden="true"></span>Welcome to the Black Parade <span class="track-chip__time">— 5:11</span></button>
+        </header>
+
+        <div class="tv-stage" aria-hidden="true">
+          <div class="tv-glow"></div>
+          <div class="tv-floor"></div>
+          <div class="tv" id="tv">
+            <!-- корпус -->
+            <div class="box box--cab">
+              <div class="bf bf--front">
+                <span class="tv-bezel" aria-hidden="true"></span>
+                <div class="tv-screen">
+                  <div class="tv-screen__content">
+                    <div class="tv-screen__word">BLACK PARADE</div>
+                    <div class="tv-screen__track" id="tvTrack"></div>
+                    <div class="tv-screen__ground"></div>
+                  </div>
+                  <div class="tv-screen__lines"></div>
+                  <div class="tv-screen__glass"></div>
+                </div>
+                <div class="tv-panel">
+                  <span class="tv-knob"></span>
+                  <span class="tv-knob tv-knob--small"></span>
+                  <span class="tv-grille"></span>
+                </div>
+              </div>
+              <div class="bf bf--back"></div>
+              <div class="bf bf--left"></div>
+              <div class="bf bf--right"></div>
+              <div class="bf bf--top">
+                <span class="tv-antenna tv-antenna--l"></span>
+                <span class="tv-antenna tv-antenna--r"></span>
+              </div>
+              <div class="bf bf--bottom"></div>
+            </div>
+            <!-- выпуклая задняя часть кинескопа -->
+            <div class="box box--rear">
+              <div class="bf bf--front"></div>
+              <div class="bf bf--back"></div>
+              <div class="bf bf--left"></div>
+              <div class="bf bf--right"></div>
+              <div class="bf bf--top"></div>
+              <div class="bf bf--bottom"></div>
+            </div>
+            <span class="tv-leg tv-leg--l"></span>
+            <span class="tv-leg tv-leg--r"></span>
+          </div>
+        </div>
+
+        <div class="pcards">
+          <div class="pcard-wrap pcard-wrap--l" data-card="0">
+            <div class="pcard">
+              <div class="pcard__face pcard__face--front">
+                <span class="pcard__num">01</span>
+                <p>Мне было лет шесть, когда отец взял меня в город смотреть на оркестр.</p>
+              </div>
+              <div class="pcard__face pcard__face--back"></div>
+              <div class="pcard__edge pcard__edge--r"></div>
+              <div class="pcard__edge pcard__edge--l"></div>
+              <div class="pcard__edge pcard__edge--t"></div>
+              <div class="pcard__edge pcard__edge--b"></div>
+            </div>
+          </div>
+          <div class="pcard-wrap pcard-wrap--r" data-card="1">
+            <div class="pcard">
+              <div class="pcard__face pcard__face--front">
+                <span class="pcard__num">02</span>
+                <p>Барабаны били так, что дрожали витрины. Трубы горели на солнце. Я сидел у него на плечах и думал, что ничего красивее на свете не бывает.</p>
+              </div>
+              <div class="pcard__face pcard__face--back"></div>
+              <div class="pcard__edge pcard__edge--r"></div>
+              <div class="pcard__edge pcard__edge--l"></div>
+              <div class="pcard__edge pcard__edge--t"></div>
+              <div class="pcard__edge pcard__edge--b"></div>
+            </div>
+          </div>
+          <div class="pcard-wrap pcard-wrap--l" data-card="2">
+            <div class="pcard">
+              <div class="pcard__face pcard__face--front">
+                <span class="pcard__num">03</span>
+                <p>И вот теперь, когда за мной пришли, они пришли именно так. Не тьма. Не тоннель со светом в конце.</p>
+              </div>
+              <div class="pcard__face pcard__face--back"></div>
+              <div class="pcard__edge pcard__edge--r"></div>
+              <div class="pcard__edge pcard__edge--l"></div>
+              <div class="pcard__edge pcard__edge--t"></div>
+              <div class="pcard__edge pcard__edge--b"></div>
+            </div>
+          </div>
+          <div class="pcard-wrap pcard-wrap--r" data-card="3">
+            <div class="pcard">
+              <div class="pcard__face pcard__face--front">
+                <span class="pcard__num">04</span>
+                <p>Чёрные мундиры, высокие кивера, белые перья. Они маршируют по больничному коридору, и никто, кроме меня, их не слышит.</p>
+              </div>
+              <div class="pcard__face pcard__face--back"></div>
+              <div class="pcard__edge pcard__edge--r"></div>
+              <div class="pcard__edge pcard__edge--l"></div>
+              <div class="pcard__edge pcard__edge--t"></div>
+              <div class="pcard__edge pcard__edge--b"></div>
+            </div>
+          </div>
+          <div class="pcard-wrap pcard-wrap--l" data-card="4">
+            <div class="pcard pcard--big">
+              <div class="pcard__face pcard__face--front">
+                <span class="pcard__num">05</span>
+                <p>Смерть пришла за мной в образе самого счастливого моего воспоминания.</p>
+              </div>
+              <div class="pcard__face pcard__face--back"></div>
+              <div class="pcard__edge pcard__edge--r"></div>
+              <div class="pcard__edge pcard__edge--l"></div>
+              <div class="pcard__edge pcard__edge--t"></div>
+              <div class="pcard__edge pcard__edge--b"></div>
+            </div>
+          </div>
+          <div class="pcard-wrap pcard-wrap--r" data-card="5">
+            <div class="pcard">
+              <div class="pcard__face pcard__face--front">
+                <span class="pcard__num">06</span>
+                <p>Я хотел бы сказать, что мне страшно. Но барабаны слишком громкие, а я слишком долго ждал, когда меня снова возьмут на плечи.</p>
+                <button class="track-chip track-chip--small" type="button" data-song="The Sharpest Lives"><span class="track-chip__icon" aria-hidden="true"></span>The Sharpest Lives <span class="track-chip__time">— 3:21</span></button>
+              </div>
+              <div class="pcard__face pcard__face--back"></div>
+              <div class="pcard__edge pcard__edge--r"></div>
+              <div class="pcard__edge pcard__edge--l"></div>
+              <div class="pcard__edge pcard__edge--t"></div>
+              <div class="pcard__edge pcard__edge--b"></div>
+            </div>
+          </div>
+        </div>
+
+        <canvas class="shards" id="paradeShards" aria-hidden="true"></canvas>
+        <svg class="pcard-filters" id="pcardFilters" width="0" height="0" aria-hidden="true"></svg>
+      </div>
+    </section>
+
+    <!-- ===== Отсчёт: 10 → 0. Шум нарастает, вспыхивают признания; на нуле — белый ===== -->
+    <section class="countdown" id="countdown" aria-label="Обратный отсчёт">
+      <div class="countdown-scene" id="countScene">
+        <canvas class="countdown__noise" id="countNoise" aria-hidden="true"></canvas>
+        <div class="countdown__flashes" id="countFlashes" aria-hidden="true"></div>
+        <div class="countdown__num" id="countNum" aria-live="off">10</div>
+        <p class="countdown__line" id="countLine" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- ===== III. Я ТЕБЯ НЕ ЛЮБЛЮ ===== -->
+    <div class="from-white" aria-hidden="true"></div>
+
+    <!-- ===== III. Я ТЕБЯ НЕ ЛЮБЛЮ =====
+         Сцена закреплена: в центре кнопочный телефон с SMS-перепиской. По скроллу приходят её сообщения,
+         он печатает, стирает и в итоге отправляет. По бокам — его мысли. -->
+    <section class="chapter chapter--love" id="i-dont-love-you" aria-labelledby="t-love">
+      <div class="love-scene" id="loveScene">
+        <header class="chapter__head chapter__head--compact">
+          <span class="chapter__num">глава III</span>
+          <h2 class="chapter__title" id="t-love">Я ТЕБЯ НЕ ЛЮБЛЮ</h2>
+          <button class="track-chip" type="button" data-song="I Don't Love You"><span class="track-chip__icon" aria-hidden="true"></span>I Don't Love You <span class="track-chip__time">— 3:59</span></button>
+        </header>
+
+        <div class="love-stage">
+          <p class="love-note love-note--l1" data-from="0.02" data-to="0.36">Ты приходила по вторникам. Я узнавал твои шаги в коридоре раньше, чем открывалась дверь.</p>
+          <p class="love-note love-note--r1" data-from="0.30" data-to="0.66">Я писал это, глядя в стену. Если бы посмотрел на тебя — не смог бы.</p>
+          <p class="love-note love-note--l2" data-from="0.62" data-to="1.1">Это была самая честная ложь в моей жизни.</p>
+          <p class="love-note love-note--r2 love-note--big" data-from="0.86" data-to="1.1">Пусть лучше она злится на живого, чем плачет над мёртвым.</p>
+
+          <div class="phone-wrap">
+            <div class="phone" id="phone">
+              <span class="phone__layer" style="--i:8"></span><span class="phone__layer" style="--i:7"></span><span class="phone__layer" style="--i:6"></span><span class="phone__layer" style="--i:5"></span><span class="phone__layer" style="--i:4"></span><span class="phone__layer" style="--i:3"></span><span class="phone__layer" style="--i:2"></span><span class="phone__layer" style="--i:1"></span>
+              <div class="phone__front">
+                <span class="phone__ear" aria-hidden="true"></span>
+                <div class="phone__screen">
+                  <div class="sms-status" aria-hidden="true"><span class="sms-signal"><i></i><i></i><i></i><i></i></span><span>Вт 14:02</span><span class="sms-battery"></span></div>
+                  <div class="sms-head">Она</div>
+                  <div class="sms-list" id="smsList" role="log" aria-label="Переписка"></div>
+                  <div class="sms-input" aria-hidden="true"><span id="smsDraft"></span><span class="sms-caret"></span></div>
+                </div>
+                <div class="phone__nav" aria-hidden="true"><span></span><span class="phone__joy"></span><span></span></div>
+                <div class="phone__keys" aria-hidden="true"><span class="key"><b>1</b><i>.,!</i></span><span class="key"><b>2</b><i>абвг</i></span><span class="key"><b>3</b><i>дежз</i></span><span class="key"><b>4</b><i>ийкл</i></span><span class="key"><b>5</b><i>мноп</i></span><span class="key"><b>6</b><i>рсту</i></span><span class="key"><b>7</b><i>фхцч</i></span><span class="key"><b>8</b><i>шщъы</i></span><span class="key"><b>9</b><i>ьэюя</i></span><span class="key"><b>*</b><i>+</i></span><span class="key"><b>0</b><i>␣</i></span><span class="key"><b>#</b><i>⇧</i></span></div>
+              </div>
+            </div>
+            <div class="phone-shadow" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== IV. МАМА... ===== -->
+    <section class="chapter chapter--mama" id="mama" aria-labelledby="t-mama">
+      <header class="chapter__head" data-reveal>
+        <span class="chapter__num">глава IV</span>
+        <h2 class="chapter__title" id="t-mama">МАМА...</h2>
+        <button class="track-chip" type="button" data-song="Disenchanted"><span class="track-chip__icon" aria-hidden="true"></span>Disenchanted <span class="track-chip__time">— 4:55</span></button>
+      </header>
+
+      <figure class="paper" data-type-group data-after="stamp">
+        <p class="paper__to" data-type>Мама.</p>
+        <p data-type>Я так и не научился писать тебе письма. Звонил и молчал в трубку, а ты всё равно понимала.</p>
+        <p data-type>Прости за все двери, которыми я хлопал. За все «потом», которые так и не наступили. За то, что ты узнала про больницу не от меня.</p>
+        <p data-type>Я помню, как ты пела на кухне, думая, что никто не слышит. Если там что-то есть, пусть там звучит это.</p>
+        <p data-type>Не выходи на улицу, когда услышишь барабаны. Тебе ещё рано на этот парад.</p>
+        <p class="paper__sign" data-type>Твой сын.</p>
+        <span class="stamp" aria-hidden="true">не отправлено</span>
+      </figure>
+    </section>
+
+    <!-- ===== V. ПОСЛЕДНЕЕ СЛОВО ===== -->
+    <section class="chapter chapter--last" id="last-words" aria-labelledby="t-last">
+      <header class="chapter__head" data-reveal>
+        <span class="chapter__num">глава V</span>
+        <h2 class="chapter__title" id="t-last">ПОСЛЕДНЕЕ СЛОВО</h2>
+        <button class="track-chip" type="button" data-song="Famous Last Words"><span class="track-chip__icon" aria-hidden="true"></span>Famous Last Words <span class="track-chip__time">— 4:59</span></button>
+      </header>
+
+      <svg class="flatline" viewBox="0 0 1728 160" preserveAspectRatio="none" aria-hidden="true">
+        <path class="flatline__path" d="M0 80 H180 L195 66 L207 80 H232 L242 94 L256 10 L270 146 L281 80 H340 L356 58 L374 80 H560 L574 68 L585 80 H606 L615 92 L627 30 L639 128 L648 80 H700 L712 66 L726 80 H900 L910 74 L918 80 H934 L940 86 L948 56 L956 104 L962 80 H1000 L1008 74 L1016 80 H1728"/>
+      </svg>
+
+      <div class="monologue monologue--final" data-type-group>
+        <p data-type>У меня осталось немного слов, и я хочу потратить их на тебя.</p>
+        <p data-type>Живи громко. Так, чтобы мне было слышно оттуда.</p>
+        <p data-type>А когда однажды услышишь барабаны — не оборачивайся. Это ещё не за тобой.</p>
+        <p class="monologue__small" data-type>Спасибо, что побыл со мной.</p>
+      </div>
+
+      <div class="answer" data-type-group>
+        <p class="answer__q" data-type>Кто говорит моим голосом?</p>
+        <p class="answer__a" data-type>Теперь — ты.</p>
+      </div>
+
+      <div class="finale" data-reveal>
+        <button class="finale__again" type="button" id="toStart">↺ с начала</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Лонгрид по мотивам альбома My Chemical Romance «The Black Parade» (2006). Истории пациента — художественный текст.</p>
+  </footer>
 
   <script src="script.js"></script>
+  <script src="longread.js"></script>
 </body>
 </html>

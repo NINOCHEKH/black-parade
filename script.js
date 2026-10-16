@@ -553,6 +553,21 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+// Показать вступление целиком (например, при переходе по меню к главам)
+window.revealStory = function () {
+  if (storyDone) return;
+  storyBlocks.forEach((b, i) => {
+    b._chars.forEach((c) => c.classList.add("is-on"));
+    b.dataset.age = String(Math.min(3, storyBlocks.length - 1 - i));
+  });
+  storyStep = storyBlocks.length - 1;
+  storyDone = true;
+  storyTyping = false;
+  story.classList.remove("can-next");
+  caret.remove();
+  unlockStory();
+};
+
 // При перезагрузке всегда начинаем сверху — иначе можно оказаться посреди блока
 if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
