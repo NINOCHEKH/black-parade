@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Old Standard TT — запасной шрифт, если Broadsheet не подключён -->
-  <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&family=Caveat:wght@500;700&family=PT+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&family=Caveat:wght@500;700&family=PT+Mono&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -134,15 +134,15 @@
          а потом всё резко становится красным (переход к «Параду»). -->
     <section class="chapter chapter--dead" id="dead" aria-labelledby="t-dead">
       <div class="dead-scene" id="deadScene">
-        <header class="chapter__head chapter__head--compact">
-          <span class="chapter__num">глава I</span>
-          <h2 class="chapter__title" id="t-dead">МЕРТВ</h2>
+        <header class="chapter__head chapter__head--compact chapter__head--chip">
           <button class="track-chip" type="button" data-song="Dead!"><span class="track-chip__icon" aria-hidden="true"></span>Dead! <span class="track-chip__time">— 3:16</span></button>
         </header>
 
         <div class="desk" aria-hidden="true"></div>
 
         <div class="stage3d" id="stage3d">
+          <!-- слово стоит за папкой и гаснет, когда папка раскрывается -->
+          <h2 class="dead-title" id="t-dead">МЕРТВ</h2>
           <div class="folder-shadow" aria-hidden="true"></div>
           <div class="folder" id="folder" role="button" tabindex="0" aria-label="Личное дело пациента № 7 — открыть">
             <!-- задняя доска (правая половина) -->
@@ -238,9 +238,9 @@
 
         <!-- то, что остаётся, когда папка рассыпалась -->
         <div class="remains" id="remains">
-          <p class="remains__small">Всё это — бумага. Её можно потерять, сжечь, сдать в архив.</p>
+          <p class="remains__small">Всё это — бумага. Её можно потерять, сжечь, сдать в архив. Через год её перепутают с чужой, через десять — выбросят вместе с остальными.</p>
           <p class="remains__big">Но есть то, что я до сих пор вспоминаю с&nbsp;теплотой.</p>
-          <p class="remains__small remains__small--late">Барабаны. Солнце в витринах. Отцовские плечи.</p>
+          <p class="remains__small remains__small--late">Ни один врач не записал этого в карту: барабаны, солнце в витринах и отцовские плечи, с которых был виден весь город.</p>
         </div>
 
         <!-- фильтр «рассыпания»: шум съедает папку по мере скролла -->
@@ -312,7 +312,6 @@
       <div class="parade-scene" id="paradeScene">
         <div class="parade-dim" aria-hidden="true"></div>
         <header class="chapter__head chapter__head--compact">
-          <span class="chapter__num">глава II</span>
           <h2 class="chapter__title" id="t-parade">ПАРАД</h2>
           <button class="track-chip" type="button" data-song="Welcome to the Black Parade"><span class="track-chip__icon" aria-hidden="true"></span>Welcome to the Black Parade <span class="track-chip__time">— 5:11</span></button>
         </header>
@@ -327,7 +326,6 @@
                 <span class="tv-bezel" aria-hidden="true"></span>
                 <div class="tv-screen">
                   <div class="tv-screen__content">
-                    <div class="tv-screen__word">BLACK PARADE</div>
                     <div class="tv-screen__track" id="tvTrack"></div>
                     <div class="tv-screen__ground"></div>
                   </div>
@@ -366,81 +364,52 @@
         <div class="pcards">
           <div class="pcard-wrap pcard-wrap--l" data-card="0">
             <div class="pcard">
-              <div class="pcard__face pcard__face--front">
-                <span class="pcard__num">01</span>
-                <p>Мне было лет шесть, когда отец взял меня в город смотреть на оркестр.</p>
+              <div class="pcard__paper">
+                <p>Мне было шесть, когда отец впервые взял меня на парад. Я помню его руки — тёплые, пахнущие табаком, — и как высоко вдруг стало, когда он поднял меня на плечи.</p>
               </div>
-              <div class="pcard__face pcard__face--back"></div>
-              <div class="pcard__edge pcard__edge--r"></div>
-              <div class="pcard__edge pcard__edge--l"></div>
-              <div class="pcard__edge pcard__edge--t"></div>
-              <div class="pcard__edge pcard__edge--b"></div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--r" data-card="1">
             <div class="pcard">
-              <div class="pcard__face pcard__face--front">
-                <span class="pcard__num">02</span>
-                <p>Барабаны били так, что дрожали витрины. Трубы горели на солнце. Я сидел у него на плечах и думал, что ничего красивее на свете не бывает.</p>
+              <div class="pcard__paper">
+                <p>Оркестр шёл по главной улице. Барабаны били так, что дрожали витрины, а медные трубы горели на солнце. Мне казалось, что ничего красивее на свете не бывает.</p>
               </div>
-              <div class="pcard__face pcard__face--back"></div>
-              <div class="pcard__edge pcard__edge--r"></div>
-              <div class="pcard__edge pcard__edge--l"></div>
-              <div class="pcard__edge pcard__edge--t"></div>
-              <div class="pcard__edge pcard__edge--b"></div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--l" data-card="2">
             <div class="pcard">
-              <div class="pcard__face pcard__face--front">
-                <span class="pcard__num">03</span>
-                <p>И вот теперь, когда за мной пришли, они пришли именно так. Не тьма. Не тоннель со светом в конце.</p>
+              <div class="pcard__paper">
+                <p>Отец наклонился и сказал: «Запомни этот день». Я запомнил. Кажется, это единственное его наставление, которое я выполнил до конца.</p>
               </div>
-              <div class="pcard__face pcard__face--back"></div>
-              <div class="pcard__edge pcard__edge--r"></div>
-              <div class="pcard__edge pcard__edge--l"></div>
-              <div class="pcard__edge pcard__edge--t"></div>
-              <div class="pcard__edge pcard__edge--b"></div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--r" data-card="3">
             <div class="pcard">
-              <div class="pcard__face pcard__face--front">
-                <span class="pcard__num">04</span>
-                <p>Чёрные мундиры, высокие кивера, белые перья. Они маршируют по больничному коридору, и никто, кроме меня, их не слышит.</p>
+              <div class="pcard__paper">
+                <p>Потом было много всего: школа, ссоры, первая любовь, работа, которую я ненавидел. Парад остался где-то на дне, под всеми этими годами.</p>
               </div>
-              <div class="pcard__face pcard__face--back"></div>
-              <div class="pcard__edge pcard__edge--r"></div>
-              <div class="pcard__edge pcard__edge--l"></div>
-              <div class="pcard__edge pcard__edge--t"></div>
-              <div class="pcard__edge pcard__edge--b"></div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--l" data-card="4">
-            <div class="pcard pcard--big">
-              <div class="pcard__face pcard__face--front">
-                <span class="pcard__num">05</span>
-                <p>Смерть пришла за мной в образе самого счастливого моего воспоминания.</p>
+            <div class="pcard">
+              <div class="pcard__paper">
+                <p>А теперь, когда за мной пришли, они пришли именно так. Не тьма и не тоннель со светом в конце. Чёрные мундиры, высокие кивера, белые перья.</p>
               </div>
-              <div class="pcard__face pcard__face--back"></div>
-              <div class="pcard__edge pcard__edge--r"></div>
-              <div class="pcard__edge pcard__edge--l"></div>
-              <div class="pcard__edge pcard__edge--t"></div>
-              <div class="pcard__edge pcard__edge--b"></div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--r" data-card="5">
             <div class="pcard">
-              <div class="pcard__face pcard__face--front">
-                <span class="pcard__num">06</span>
-                <p>Я хотел бы сказать, что мне страшно. Но барабаны слишком громкие, а я слишком долго ждал, когда меня снова возьмут на плечи.</p>
+              <div class="pcard__paper">
+                <p>Они маршируют по больничному коридору, и никто, кроме меня, их не слышит. Медсёстры проходят сквозь строй и не замечают его.</p>
+              </div>
+            </div>
+          </div>
+          <div class="pcard-wrap pcard-wrap--l" data-card="6">
+            <div class="pcard pcard--big">
+              <div class="pcard__paper">
+                <p>Смерть пришла за мной в образе самого счастливого моего воспоминания.</p>
                 <button class="track-chip track-chip--small" type="button" data-song="The Sharpest Lives"><span class="track-chip__icon" aria-hidden="true"></span>The Sharpest Lives <span class="track-chip__time">— 3:21</span></button>
               </div>
-              <div class="pcard__face pcard__face--back"></div>
-              <div class="pcard__edge pcard__edge--r"></div>
-              <div class="pcard__edge pcard__edge--l"></div>
-              <div class="pcard__edge pcard__edge--t"></div>
-              <div class="pcard__edge pcard__edge--b"></div>
             </div>
           </div>
         </div>
@@ -455,38 +424,77 @@
       <div class="countdown-scene" id="countScene">
         <canvas class="countdown__noise" id="countNoise" aria-hidden="true"></canvas>
         <div class="countdown__flashes" id="countFlashes" aria-hidden="true"></div>
-        <div class="countdown__num" id="countNum" aria-live="off">10</div>
+        <canvas class="countdown__noise countdown__noise--over" id="countNoiseOver" aria-hidden="true"></canvas>
+        <!-- 3D-часы с перекидными цифрами: выплывают из темноты и считают сами -->
+        <div class="clock-stage" id="clockStage" aria-hidden="true">
+          <div class="clock-glow"></div>
+          <div class="clock" id="clock">
+            <div class="clock-sway">
+              <div class="box box--clock">
+                <div class="bf bf--front">
+                  <div class="clock__face">
+                    <div class="flip" id="flipTens"></div>
+                    <div class="flip" id="flipOnes"></div>
+                  </div>
+                  <span class="clock__screw clock__screw--tl"></span><span class="clock__screw clock__screw--tr"></span>
+                  <span class="clock__screw clock__screw--bl"></span><span class="clock__screw clock__screw--br"></span>
+                </div>
+                <div class="bf bf--back"></div>
+                <div class="bf bf--left"></div>
+                <div class="bf bf--right"></div>
+                <div class="bf bf--top"></div>
+                <div class="bf bf--bottom"></div>
+              </div>
+            </div>
+          </div>
+          <div class="clock-veil"></div>
+        </div>
+        <span class="sr-only" id="countNum">10</span>
         <p class="countdown__line" id="countLine" aria-live="polite"></p>
       </div>
     </section>
 
-    <!-- ===== III. Я ТЕБЯ НЕ ЛЮБЛЮ ===== -->
+    <!-- белый после отсчёта плавно уходит в чёрный -->
     <div class="from-white" aria-hidden="true"></div>
 
     <!-- ===== III. Я ТЕБЯ НЕ ЛЮБЛЮ =====
-         Сцена закреплена: в центре кнопочный телефон с SMS-перепиской. По скроллу приходят её сообщения,
-         он печатает, стирает и в итоге отправляет. По бокам — его мысли. -->
+         Сцена закреплена. Слева идёт текст, телефон крупно справа; потом текст справа, телефон слева.
+         В телефоне — переписка: она пишет, он набирает, стирает и в итоге отправляет. Батарея садится, в конце телефон гаснет. -->
     <section class="chapter chapter--love" id="i-dont-love-you" aria-labelledby="t-love">
       <div class="love-scene" id="loveScene">
         <header class="chapter__head chapter__head--compact">
-          <span class="chapter__num">глава III</span>
           <h2 class="chapter__title" id="t-love">Я ТЕБЯ НЕ ЛЮБЛЮ</h2>
           <button class="track-chip" type="button" data-song="I Don't Love You"><span class="track-chip__icon" aria-hidden="true"></span>I Don't Love You <span class="track-chip__time">— 3:59</span></button>
         </header>
 
         <div class="love-stage">
-          <p class="love-note love-note--l1" data-from="0.02" data-to="0.36">Ты приходила по вторникам. Я узнавал твои шаги в коридоре раньше, чем открывалась дверь.</p>
-          <p class="love-note love-note--r1" data-from="0.30" data-to="0.66">Я писал это, глядя в стену. Если бы посмотрел на тебя — не смог бы.</p>
-          <p class="love-note love-note--l2" data-from="0.62" data-to="1.1">Это была самая честная ложь в моей жизни.</p>
-          <p class="love-note love-note--r2 love-note--big" data-from="0.86" data-to="1.1">Пусть лучше она злится на живого, чем плачет над мёртвым.</p>
+          <!-- текст сначала идёт слева, телефон справа; потом наоборот -->
+          <div class="love-col love-col--l" id="loveColL">
+            <div class="love-col__inner">
+              <p>Она приходила по вторникам. Я узнавал её шаги в коридоре раньше, чем открывалась дверь: быстрые, чуть сбивчивые, будто она всё время боялась опоздать.</p>
+              <p>Она приносила апельсины, хотя я давно не мог их есть, и чистила их сама — просто чтобы в палате пахло чем-то, кроме лекарств.</p>
+              <p>Мы почти не говорили о болезни. Она рассказывала про соседей, про кота, про сериал, который мы так и не досмотрели. Я слушал и считал, сколько вторников у нас осталось.</p>
+              <p>Уходя, она каждый раз говорила «до вторника». Так говорят, когда уверены, что вторник наступит.</p>
+              <p class="love-col__accent">Я начал бояться вторников.</p>
+            </div>
+          </div>
+          <div class="love-col love-col--r" id="loveColR">
+            <div class="love-col__inner">
+              <p>Я понимал, к чему всё идёт. И понимал, что она останется рядом до самого конца — смотреть, как я перестаю быть собой.</p>
+              <p>Я не хотел, чтобы последним, что она запомнит, стала эта палата: трубки, запах хлорки, человек, который с трудом узнаёт её голос.</p>
+              <p>Поэтому я написал то, что написал. Печатал, глядя в стену. Если бы посмотрел на её фотографию — не смог бы нажать «отправить».</p>
+              <p>Это была самая честная ложь в моей жизни.</p>
+              <p class="love-col__big">Пусть лучше она злится на живого, чем плачет над мёртвым.</p>
+            </div>
+          </div>
 
-          <div class="phone-wrap">
+          <div class="phone-wrap" id="phoneWrap">
             <div class="phone" id="phone">
               <span class="phone__layer" style="--i:8"></span><span class="phone__layer" style="--i:7"></span><span class="phone__layer" style="--i:6"></span><span class="phone__layer" style="--i:5"></span><span class="phone__layer" style="--i:4"></span><span class="phone__layer" style="--i:3"></span><span class="phone__layer" style="--i:2"></span><span class="phone__layer" style="--i:1"></span>
               <div class="phone__front">
                 <span class="phone__ear" aria-hidden="true"></span>
                 <div class="phone__screen">
-                  <div class="sms-status" aria-hidden="true"><span class="sms-signal"><i></i><i></i><i></i><i></i></span><span>Вт 14:02</span><span class="sms-battery"></span></div>
+                  <div class="sms-status" aria-hidden="true"><span class="sms-signal"><i></i><i></i><i></i><i></i></span><span id="smsClock">21:40</span><span class="sms-battery" id="smsBattery"></span></div>
                   <div class="sms-head">Она</div>
                   <div class="sms-list" id="smsList" role="log" aria-label="Переписка"></div>
                   <div class="sms-input" aria-hidden="true"><span id="smsDraft"></span><span class="sms-caret"></span></div>
@@ -501,60 +509,89 @@
       </div>
     </section>
 
-    <!-- ===== IV. МАМА... ===== -->
+    <!-- ===== IV. МАМА... =====
+         Письмо маме сложено в кольца текста. Сверху падают неотправленные письма, горят
+         и на лету расталкивают строки в стороны. Кольца проявляются по мере скролла. -->
     <section class="chapter chapter--mama" id="mama" aria-labelledby="t-mama">
-      <header class="chapter__head" data-reveal>
-        <span class="chapter__num">глава IV</span>
-        <h2 class="chapter__title" id="t-mama">МАМА...</h2>
-        <button class="track-chip" type="button" data-song="Disenchanted"><span class="track-chip__icon" aria-hidden="true"></span>Disenchanted <span class="track-chip__time">— 4:55</span></button>
-      </header>
-
-      <figure class="paper" data-type-group data-after="stamp">
-        <p class="paper__to" data-type>Мама.</p>
-        <p data-type>Я так и не научился писать тебе письма. Звонил и молчал в трубку, а ты всё равно понимала.</p>
-        <p data-type>Прости за все двери, которыми я хлопал. За все «потом», которые так и не наступили. За то, что ты узнала про больницу не от меня.</p>
-        <p data-type>Я помню, как ты пела на кухне, думая, что никто не слышит. Если там что-то есть, пусть там звучит это.</p>
-        <p data-type>Не выходи на улицу, когда услышишь барабаны. Тебе ещё рано на этот парад.</p>
-        <p class="paper__sign" data-type>Твой сын.</p>
-        <span class="stamp" aria-hidden="true">не отправлено</span>
-      </figure>
+      <div class="mama-scene" id="mamaScene">
+        <header class="chapter__head chapter__head--compact">
+          <h2 class="chapter__title" id="t-mama">МАМА...</h2>
+          <button class="track-chip" type="button" data-song="Disenchanted"><span class="track-chip__icon" aria-hidden="true"></span>Disenchanted <span class="track-chip__time">— 4:55</span></button>
+        </header>
+        <canvas class="mama-canvas" id="mamaCanvas" aria-hidden="true"></canvas>
+        <!-- текст письма для чтения с экранного диктора; на холсте — он же, по кольцам -->
+        <div class="sr-only" id="mamaLetter">
+          <p data-ring>Мама, я так и не научился писать тебе письма. Звонил и молчал в трубку, а ты всё равно понимала, что я хотел сказать.</p>
+          <p data-ring>Прости за все двери, которыми я хлопал, и за все «потом», которые так и не наступили.</p>
+          <p data-ring>Прости, что про больницу ты узнала не от меня.</p>
+          <p data-ring>Я помню, как ты пела на кухне, думая, что никто не слышит.</p>
+          <p data-ring>Если там что-то есть, пусть там звучит это.</p>
+          <p data-ring>Не выходи на улицу, когда услышишь барабаны.</p>
+          <p data-center>Тебе ещё рано на этот парад.</p>
+        </div>
+      </div>
     </section>
 
-    <!-- ===== V. ПОСЛЕДНЕЕ СЛОВО ===== -->
+    <!-- ===== V. ПОСЛЕДНЕЕ СЛОВО =====
+         Его последний текст кружится в глубине. Через некоторое время внизу появляется кнопка;
+         она открывает вопрос. Ответ «да» уползает; на третий раз он благодарит, и лонгрид исчезает. -->
     <section class="chapter chapter--last" id="last-words" aria-labelledby="t-last">
-      <header class="chapter__head" data-reveal>
-        <span class="chapter__num">глава V</span>
-        <h2 class="chapter__title" id="t-last">ПОСЛЕДНЕЕ СЛОВО</h2>
-        <button class="track-chip" type="button" data-song="Famous Last Words"><span class="track-chip__icon" aria-hidden="true"></span>Famous Last Words <span class="track-chip__time">— 4:59</span></button>
-      </header>
-
-      <svg class="flatline" viewBox="0 0 1728 160" preserveAspectRatio="none" aria-hidden="true">
-        <path class="flatline__path" d="M0 80 H180 L195 66 L207 80 H232 L242 94 L256 10 L270 146 L281 80 H340 L356 58 L374 80 H560 L574 68 L585 80 H606 L615 92 L627 30 L639 128 L648 80 H700 L712 66 L726 80 H900 L910 74 L918 80 H934 L940 86 L948 56 L956 104 L962 80 H1000 L1008 74 L1016 80 H1728"/>
-      </svg>
-
-      <div class="monologue monologue--final" data-type-group>
-        <p data-type>У меня осталось немного слов, и я хочу потратить их на тебя.</p>
-        <p data-type>Живи громко. Так, чтобы мне было слышно оттуда.</p>
-        <p data-type>А когда однажды услышишь барабаны — не оборачивайся. Это ещё не за тобой.</p>
-        <p class="monologue__small" data-type>Спасибо, что побыл со мной.</p>
-      </div>
-
-      <div class="answer" data-type-group>
-        <p class="answer__q" data-type>Кто говорит моим голосом?</p>
-        <p class="answer__a" data-type>Теперь — ты.</p>
-      </div>
-
-      <div class="finale" data-reveal>
-        <button class="finale__again" type="button" id="toStart">↺ с начала</button>
+      <div class="last-scene" id="lastScene">
+        <header class="chapter__head chapter__head--compact">
+          <h2 class="chapter__title" id="t-last">ПОСЛЕДНЕЕ СЛОВО</h2>
+          <button class="track-chip" type="button" data-song="Famous Last Words"><span class="track-chip__icon" aria-hidden="true"></span>Famous Last Words <span class="track-chip__time">— 4:59</span></button>
+        </header>
+        <div class="vortex" id="vortex" aria-hidden="true"></div>
+        <button class="ask-btn" id="askBtn" type="button" hidden>ответь мне на вопрос</button>
+        <!-- тот же текст обычными абзацами — для экранного диктора; на экране он кружится в вихре -->
+        <div class="sr-only" id="lastText">
+          <p>Странно, как много времени мы тратим на то, чтобы нас запомнили, и как мало — на то, чтобы понять, кем мы были на самом деле.</p>
+          <p>Я всегда думал, что в конце смогу оглянуться назад и увидеть какую-то цельную историю. Что все мои ошибки, поступки и решения наконец обретут смысл. Что я пойму, ради чего всё это было. Но теперь, когда времени почти не осталось, я вижу лишь отдельные моменты. Людей, которых любил, но не умел беречь. Слова, которые так и не произнёс. Обещания, о которых давно забыли все, кроме меня.</p>
+          <p>Я не был жестоким человеком. По крайней мере, мне хочется в это верить. Но разве достаточно не желать никому зла, чтобы считать себя хорошим? Сколько раз я причинял боль, даже не замечая этого? Сколько раз выбирал собственное спокойствие вместо чужого счастья? И сколько добрых поступков нужно совершить, чтобы однажды перестать чувствовать вину?</p>
+          <p>Говорят, после смерти от человека остаётся память. Но у каждого, кто меня знал, будет своя версия меня. Для кого-то я был причиной улыбки. Для кого-то — разочарованием. Кто-то будет скучать, а кто-то почувствует облегчение. И все они будут по-своему правы.</p>
+          <p>Наверное, больше всего меня пугает не сама смерть. А то, что я так и не узнаю, кем был в глазах других. Ведь я всю жизнь смотрел на себя изнутри, оправдывал свои ошибки намерениями, которых никто не видел, и прощал себе то, за что, возможно, не простил бы другого.</p>
+          <p>Поэтому сейчас, когда мне больше нечего доказывать и не у кого просить прощения, я хочу спросить тебя об одном.</p>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    <p>Лонгрид по мотивам альбома My Chemical Romance «The Black Parade» (2006). Истории пациента — художественный текст.</p>
-  </footer>
+  <!-- Вопрос: открывается кнопкой «ответь мне на вопрос» -->
+  <div class="question" id="question" role="dialog" aria-modal="true" aria-labelledby="questionText" hidden>
+    <p class="question__text" id="questionText">
+      <span class="question__line question__line--1">Ты узнал меня всего…</span>
+      <span class="question__line question__line--2">Скажи честно: был ли я хорошим человеком?</span>
+    </p>
+    <button class="question__yes" id="yesBtn" type="button">да</button>
+    <p class="question__thanks" id="thanks" aria-live="polite"></p>
+  </div>
+
+  <!-- Источники: остаются последними, даже когда лонгрид исчезнет -->
+  <section class="sources" id="sources" aria-labelledby="t-sources">
+    <h2 class="sources__title" id="t-sources">Источники</h2>
+    <ul class="sources__list">
+      <li>My Chemical Romance. <i>The Black Parade</i>. — Reprise Records, 2006. <a href="https://en.wikipedia.org/wiki/The_Black_Parade" target="_blank" rel="noopener">Об альбоме — Википедия</a></li>
+      <li>Фрагменты песен альбома: Dead!, This Is How I Disappear, The Sharpest Lives, Welcome to the Black Parade, I Don’t Love You, Cancer, Disenchanted, Famous Last Words, The End. Права принадлежат правообладателям.</li>
+      <li>Официальный сайт группы — <a href="https://www.mychemicalromance.com" target="_blank" rel="noopener">mychemicalromance.com</a></li>
+      <li>Шрифты Old Standard TT, Caveat, PT Mono и Oswald — <a href="https://fonts.google.com" target="_blank" rel="noopener">Google Fonts</a></li>
+      <li>Дизайн-макет «Добро пожаловать» и изображения — материалы автора проекта.</li>
+      <li>История пациента — художественный текст по мотивам концепции альбома. Все совпадения с реальными людьми случайны.</li>
+    </ul>
+    <button class="sources__again" id="readAgain" type="button" hidden>перечитать</button>
+  </section>
+
+  <!-- Плёнка поверх всего лонгрида: зерно, виньетка, мерцание, царапины -->
+  <div class="film" aria-hidden="true">
+    <div class="film__grain"></div>
+    <div class="film__specks"></div>
+    <div class="film__vignette"></div>
+    <span class="film__scratch film__scratch--a"></span>
+    <span class="film__scratch film__scratch--b"></span>
+  </div>
 
   <script src="script.js"></script>
   <script src="longread.js"></script>
+  <script src="mama.js"></script>
+  <script src="finale.js"></script>
 </body>
 </html>

@@ -342,6 +342,7 @@
 
   function setDissolve(v) {
     dis = v;
+    scene.style.setProperty("--dis", v.toFixed(3));
     stage.classList.toggle("is-dissolving", v > 0.001);
     // порог по шуму: 0 — всё на месте, 1 — ничего не осталось
     const T = lerp(0.18, 0.86, v);
@@ -515,7 +516,47 @@
   const pCanvas = document.getElementById("paradeShards");
   const pctx2 = pCanvas && pCanvas.getContext("2d");
   let pShards = [], pDpr = 1, tvState = "off";
-  const CARD_COLORS = ["#ece8e0", "#ece8e0", "#d6d0c4", "#b9b2a5", "#141313", "#c50000"];
+  const CARD_COLORS = ["#f1f0ec", "#f1f0ec", "#e2e1dc", "#ffffff", "#141313", "#c50000"];
+
+  // у каждой записки свой износ: рваные края, сгиб, пятна, скотч (случайно, но одинаково при каждом заходе)
+  function seeded(seed) {
+    return () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  function tornClip(rnd) {
+    const pts = [];
+    const tear = (rnd() * 4) | 0;                     // одна сторона порвана сильнее
+    const edge = (side, n, f) => {
+      for (let i = 0; i <= n; i++) {
+        const t = i / n;
+        const big = side === tear ? 1 : 0.35;
+        const j = (rnd() * 1.6 + (rnd() < 0.18 ? rnd() * 3.5 : 0)) * big;
+        pts.push(f(t * 100, j));
+      }
+    };
+    edge(0, 22, (t, j) => [t, j]);                     // верх
+    edge(1, 26, (t, j) => [100 - j, t]);               // право
+    edge(2, 22, (t, j) => [100 - t, 100 - j]);         // низ
+    edge(3, 26, (t, j) => [j, 100 - t]);               // лево
+    // оторванный уголок
+    const c = (rnd() * 4) | 0, k = 6 + rnd() * 8;
+    const cut = [[0, 0], [100, 0], [100, 100], [0, 100]][c];
+    const out = pts.filter(([x, y]) => Math.abs(x - cut[0]) + Math.abs(y - cut[1]) > k);
+    return "polygon(" + out.map(([x, y]) => `${x.toFixed(1)}% ${y.toFixed(1)}%`).join(",") + ")";
+  }
+  pCards.forEach((wrap, i) => {
+    const rnd = seeded(97 + i * 131);
+    const paper = wrap.querySelector(".pcard");
+    paper.style.setProperty("--clip", tornClip(rnd));
+    paper.style.setProperty("--fold", (95 + rnd() * 40).toFixed(0) + "deg");
+    paper.style.setProperty("--rz", ((rnd() - 0.5) * 5).toFixed(1) + "deg");
+    ["s1", "s2", "s3"].forEach((k) => {
+      paper.style.setProperty(`--${k}x`, (10 + rnd() * 80).toFixed(0) + "%");
+      paper.style.setProperty(`--${k}y`, (10 + rnd() * 80).toFixed(0) + "%");
+    });
+    paper.style.setProperty("--tape", rnd() < 0.6 ? "1" : "0");
+    paper.style.setProperty("--tape-x", (20 + rnd() * 45).toFixed(0) + "%");
+    paper.style.setProperty("--tape-r", ((rnd() - 0.5) * 12).toFixed(1) + "deg");
+  });
 
   // свой фильтр «рассыпания» у каждой карточки
   const svgNS = "http://www.w3.org/2000/svg";
@@ -539,11 +580,11 @@
   function setCardTimings() {
     pCards.forEach((wrap, i) => {
       if (narrowMQ.matches) {
-        const start = 0.05 + i * 0.15;
-        wrap._t = { in0: start, in1: start + 0.03, out0: start + 0.09, out1: start + 0.14 };
+        const start = 0.04 + i * 0.128;
+        wrap._t = { in0: start, in1: start + 0.03, out0: start + 0.09, out1: start + 0.122 };
       } else {
-        const start = 0.05 + i * 0.13;
-        wrap._t = { in0: start, in1: start + 0.04, out0: start + 0.15, out1: start + 0.23 };
+        const start = 0.04 + i * 0.112;
+        wrap._t = { in0: start, in1: start + 0.035, out0: start + 0.15, out1: start + 0.205 };
       }
     });
   }
@@ -648,25 +689,25 @@
   const cFlashes = document.getElementById("countFlashes");
   const cLine = document.getElementById("countLine");
   const nctx = cNoise && cNoise.getContext("2d");
-  // строки, которые он говорит на каждой цифре — всё тяжелее
+  // что он говорит на каждой цифре — всё тяжелее
   const COUNT_LINES = {
     10: "Говорят, перед концом вся жизнь проносится перед глазами.",
-    9: "У меня она не проносится. Она тянется, как очередь в регистратуру.",
-    8: "И в этой очереди нет ни одного дня, которым я горжусь.",
-    7: "Я был громким там, где надо было молчать. И молчал там, где надо было кричать.",
-    6: "Люди уставали от меня. Я видел это — и делал вид, что не вижу.",
-    5: "Я сам отталкивал всех, а потом жаловался, что остался один.",
+    9: "Моя не проносится. Она тянется, как очередь в коридоре поликлиники.",
+    8: "И в этой очереди почти нет дней, за которые мне не стыдно.",
+    7: "Я молчал, когда нужно было говорить, и говорил, когда лучше было промолчать.",
+    6: "Люди уставали от меня. Я замечал это — и делал вид, что не замечаю.",
+    5: "Я сам отталкивал тех, кто был рядом, а потом жаловался, что остался один.",
     4: "Я не был хорошим человеком.",
-    3: "Я даже не был плохим. Я был никаким.",
-    2: "Меня забудут быстрее, чем выветрится запах хлорки из этой палаты.",
-    1: "И это, наверное, честно.",
+    3: "Хуже того — я был никаким. Таких не ненавидят. Таких просто не помнят.",
+    2: "Меня забудут быстрее, чем из этой палаты выветрится запах хлорки.",
+    1: "Наверное, это честно.",
   };
   // признания вспыхивают вокруг — ступенями, от тихих к невыносимым
   const CONFESSIONS = [
-    ["я не перезвонил", "я забыл про её день рождения", "я обещал и не пришёл", "я опять опоздал", "я сказал «потом»"],
-    ["я врал тем, кто меня любил", "я хлопал дверью", "я делал вид, что мне всё равно", "мне было стыдно, и я злился", "я ни разу не сказал «спасибо»"],
-    ["я не был хорошим человеком", "я делал больно нарочно", "я никого не спас", "я не стою этих цветов", "меня не за что вспомнить", "я не был хорошим сыном"],
-    ["поздно", "ПОЗДНО", "никто не придёт", "прости", "тишина", "уже ничего не исправить", "некому сказать"],
+    ["я не перезвонил", "я сказал «потом»", "я опять опоздал", "я забыл её день рождения"],
+    ["я врал тем, кто меня любил", "я хлопал дверью", "я делал вид, что мне всё равно", "я ни разу не сказал спасибо"],
+    ["я не был хорошим сыном", "я делал больно нарочно", "меня не за что вспомнить", "я никого не удержал"],
+    ["поздно", "никто не придёт", "прости", "уже ничего не исправить"],
   ];
   // сколько секунд держится каждая цифра: в начале медленно, к концу всё быстрее
   const COUNT_STEP = { 10: 2.9, 9: 2.9, 8: 2.6, 7: 3.0, 6: 2.6, 5: 2.5, 4: 2.2, 3: 2.0, 2: 2.3, 1: 1.7, 0: 0.9 };
@@ -680,6 +721,7 @@
     if (!cNoise) return;
     cNoise.width = 240; cNoise.height = 135;     // мелкая картинка, растянутая на экран, — как помехи в эфире
     noiseImg = nctx.createImageData(cNoise.width, cNoise.height);
+    if (cNoiseOver) { cNoiseOver.width = 240; cNoiseOver.height = 135; }
   }
 
   function setLine(text) {
@@ -688,9 +730,49 @@
     setTimeout(() => { cLine.textContent = text; cLine.classList.remove("is-swap"); }, 300);
   }
 
+  /* --- перекидные цифры --- */
+  const flipTens = document.getElementById("flipTens");
+  const flipOnes = document.getElementById("flipOnes");
+  const clockStage = document.getElementById("clockStage");
+  const cNoiseOver = document.getElementById("countNoiseOver");
+  const noctx = cNoiseOver && cNoiseOver.getContext("2d");
+  let clockArrive = 0, clockArriving = false, clockArriveStart = 0;
+
+  function buildFlip(el, d) {
+    el.innerHTML = ["flip__half flip__half--top", "flip__half flip__half--bot", "flip__flap flip__flap--top", "flip__flap flip__flap--bot"]
+      .map((c) => `<div class="${c}"><span>${d}</span></div>`).join("");
+    el._d = d;
+    el._s = Array.from(el.querySelectorAll("span"));   // верх, низ, створка-верх, створка-низ
+  }
+  function setFlip(el, d, animate) {
+    if (!el || el._d === d) return;
+    const prev = el._d;
+    const [ht, hb, ft, fb] = el._s;
+    el._d = d;
+    clearTimeout(el._timer);
+    if (!animate || reduce) {
+      [ht, hb, ft, fb].forEach((x) => (x.textContent = d));
+      el.classList.remove("is-flipping");
+      return;
+    }
+    // верх уже новый, низ ещё старый; верхняя створка падает со старой цифрой, нижняя — опускается с новой
+    ht.textContent = d; hb.textContent = prev; ft.textContent = prev; fb.textContent = d;
+    el.classList.remove("is-flipping"); void el.offsetWidth; el.classList.add("is-flipping");
+    el._timer = setTimeout(() => {
+      hb.textContent = d; ft.textContent = d;
+      el.classList.remove("is-flipping");
+    }, 640);
+  }
+  function setClock(n, animate) {
+    const t = String(Math.floor(n / 10)), o = String(n % 10);
+    setFlip(flipTens, t, animate);
+    setFlip(flipOnes, o, animate);
+  }
+  if (flipTens) { buildFlip(flipTens, "1"); buildFlip(flipOnes, "0"); }
+
   function showNumber(n) {
     cNum.textContent = String(n);
-    cNum.classList.remove("is-tick"); void cNum.offsetWidth; cNum.classList.add("is-tick");
+    setClock(n, true);
     setLine(COUNT_LINES[n] || "");
   }
 
@@ -698,6 +780,9 @@
     cState = "wait"; cNum0 = 10; cProgress = 0; cElapsedBefore = 0; cWhite = false;
     cScene.classList.remove("is-white", "is-done");
     cNum.textContent = "10"; cLine.textContent = ""; cFlashes.innerHTML = "";
+    setClock(10, false);
+    clockArriving = false; clockArrive = 0;
+    clockStage.style.setProperty("--ca", "0");
     cNoiseLevel = 0; cScene.style.setProperty("--noise", "0");
   }
 
@@ -706,8 +791,12 @@
     cLockY = Math.round(window.scrollY + countSec.getBoundingClientRect().top - (parseFloat(getComputedStyle(cScene).top) || 0));
     window.scrollTo(0, cLockY);
     cNum0 = 10; cElapsedBefore = 0;
-    cStepEnd = performance.now() + COUNT_STEP[10] * 1000;
-    showNumber(10);
+    setClock(10, false);
+    // часы выплывают из темноты; первая цифра держится, пока они не подъедут
+    clockArriving = true; clockArriveStart = performance.now();
+    cStepEnd = performance.now() + (COUNT_STEP[10] + 1.6) * 1000;
+    cNum.textContent = "10";
+    setTimeout(() => { if (cState === "run") setLine(COUNT_LINES[10]); }, 1400);
   }
 
   function finishCountdown() {
@@ -715,6 +804,9 @@
     cWhite = true;
     cNoiseLevel = 0;
     cNum.textContent = "0";
+    setClock(0, false);
+    clockArriving = false; clockArrive = 1;
+    clockStage.style.setProperty("--ca", "1");
     cScene.classList.add("is-white", "is-done");
     cScene.style.setProperty("--noise", "0");
     cFlashes.innerHTML = "";
@@ -731,7 +823,7 @@
       cStepEnd = now + COUNT_STEP[cNum0] * 1000;
       showNumber(cNum0);
     }
-    const inStep = COUNT_STEP[cNum0] - Math.max(0, (cStepEnd - now) / 1000);
+    const inStep = Math.max(0, COUNT_STEP[cNum0] - Math.max(0, (cStepEnd - now) / 1000));
     cProgress = clamp01((cElapsedBefore + inStep) / COUNT_TOTAL);
     cNoiseLevel = Math.pow(cProgress, 1.4);
     cScene.style.setProperty("--noise", cNoiseLevel.toFixed(3));
@@ -780,7 +872,7 @@
     el.textContent = tier[(Math.random() * tier.length) | 0];
     // вокруг цифры, не поверх неё и не поверх строки внизу
     let x, y;
-    do { x = Math.random(); y = Math.random() * 0.8; } while (Math.abs(x - 0.5) < 0.22 && Math.abs(y - 0.45) < 0.3);
+    do { x = Math.random(); y = Math.random() * 0.8; } while (Math.abs(x - 0.45) < 0.3 && Math.abs(y - 0.42) < 0.3);
     el.style.left = (x * 82 + 2) + "%";
     el.style.top = (y * 86 + 4) + "%";
     const want = 13 + Math.random() * (14 + 26 * cNoiseLevel);
@@ -795,6 +887,12 @@
 
   function drawCountdown(now) {
     tickCountdown(now);
+    if (clockArriving) {
+      clockArrive = reduce ? 1 : clamp01((now - clockArriveStart) / 3400);
+      const e = 1 - Math.pow(1 - clockArrive, 3);
+      clockStage.style.setProperty("--ca", e.toFixed(4));
+      if (clockArrive >= 1) clockArriving = false;
+    }
     if (!cVisible || cWhite || cState !== "run") return;
     if (nctx && cNoiseLevel > 0.01) {
       const d = noiseImg.data;
@@ -803,11 +901,12 @@
         d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255;
       }
       nctx.putImageData(noiseImg, 0, 0);
+      if (noctx) noctx.drawImage(cNoise, 0, 0);          // те же помехи поверх часов, только слабее
     }
-    const g = reduce ? 0 : cNoiseLevel;
-    cNum.style.setProperty("--gx", (g * (4 + Math.random() * 10)).toFixed(1));
-    cNum.style.setProperty("--jx", ((Math.random() - 0.5) * g * 14).toFixed(1));
-    cNum.style.setProperty("--jy", ((Math.random() - 0.5) * g * 8).toFixed(1));
+    // ближе к нулю часы дёргаются
+    const g = reduce ? 0 : Math.max(0, cNoiseLevel - 0.35) * 1.6;
+    clockStage.style.setProperty("--shx", ((Math.random() - 0.5) * g * 16).toFixed(1));
+    clockStage.style.setProperty("--shy", ((Math.random() - 0.5) * g * 8).toFixed(1));
     if (!reduce && now > nextFlashAt && cNoiseLevel > 0.03) {
       spawnFlash();
       nextFlashAt = now + (1200 - 1120 * cNoiseLevel) * (0.5 + Math.random());
@@ -826,31 +925,35 @@
   window.addEventListener("resize", sizePShards);
   requestAnimationFrame(sceneLoop);
 
-  /* ---------- Глава III: переписка в телефоне ---------- */
+  /* ---------- Глава III: текст слева и справа, переписка, телефон садится ---------- */
   const loveSec = document.getElementById("i-dont-love-you");
   const loveScene = document.getElementById("loveScene");
   const phone = document.getElementById("phone");
+  const phoneWrap = document.getElementById("phoneWrap");
   const smsList = document.getElementById("smsList");
   const smsDraft = document.getElementById("smsDraft");
-  const loveNotes = loveScene ? Array.from(loveScene.querySelectorAll(".love-note")) : [];
+  const smsClock = document.getElementById("smsClock");
+  const smsBattery = document.getElementById("smsBattery");
+  const loveColL = document.getElementById("loveColL");
+  const loveColR = document.getElementById("loveColR");
   const phoneKeys = phone ? Array.from(phone.querySelectorAll(".key")) : [];
 
-  // её сообщения и его — по времени на шкале скролла главы
+  // шкала главы (0…1): 0–0.08 телефон уходит вправо и растёт; 0.03–0.47 текст слева;
+  // 0.46–0.56 телефон переезжает влево; 0.52–0.9 текст справа; 0.86 батарея мигает; 0.93 телефон гаснет
   const SMS = [
-    { at: 0.04, who: "her", meta: "Она · 21:40", text: "ты спишь?" },
-    { at: 0.10, who: "her", meta: "Она · 21:41", text: "я приду во вторник. принесу апельсины" },
-    { at: 0.16, who: "her", meta: "Она · 21:44", text: "врач сказал, тебе лучше. это правда?" },
-    { at: 0.45, who: "her", meta: "Она · 22:30", text: "?" },
-    { at: 0.49, who: "her", meta: "Она · 23:05", text: "ты тут?" },
-    { at: 0.71, who: "me",  meta: "Я · 23:52 · доставлено", text: "не приходи больше. я тебя не люблю" },
-    { at: 0.80, who: "her", meta: "Она · 23:58", text: "это неправда" },
-    { at: 0.88, who: "her", meta: "Она · 00:03", text: "я всё равно приду во вторник" },
+    { at: 0.06, who: "her", meta: "Она · 21:40", text: "ты спишь?" },
+    { at: 0.12, who: "her", meta: "Она · 21:41", text: "я приду во вторник. принесу апельсины" },
+    { at: 0.18, who: "her", meta: "Она · 21:44", text: "врач сказал, тебе лучше. это правда?" },
+    { at: 0.42, who: "her", meta: "Она · 22:30", text: "?" },
+    { at: 0.47, who: "her", meta: "Она · 23:05", text: "ты тут?" },
+    { at: 0.72, who: "me",  meta: "Я · 23:52 · доставлено", text: "не приходи больше. я тебя не люблю" },
+    { at: 0.79, who: "her", meta: "Она · 23:58", text: "это неправда" },
+    { at: 0.85, who: "her", meta: "Она · 00:03", text: "я всё равно приду во вторник" },
   ];
-  // что он набирает и стирает
   const DRAFTS = [
-    { from: 0.21, to: 0.27, hold: 0.29, erase: 0.31, text: "да, всё хорошо" },
-    { from: 0.34, to: 0.38, hold: 0.40, erase: 0.42, text: "мне страшно" },
-    { from: 0.53, to: 0.68, hold: 0.71, erase: 0.71, text: "не приходи больше. я тебя не люблю", send: true },
+    { from: 0.22, to: 0.27, hold: 0.29, erase: 0.31, text: "да, всё хорошо" },
+    { from: 0.33, to: 0.36, hold: 0.38, erase: 0.40, text: "мне страшно" },
+    { from: 0.56, to: 0.69, hold: 0.72, erase: 0.72, text: "не приходи больше. я тебя не люблю", send: true },
   ];
   let smsShown = -1, lastDraft = "";
 
@@ -871,6 +974,15 @@
     setTimeout(() => k.classList.remove("is-down"), 90);
   }
 
+  // колонка «проезжает» снизу вверх; end — где остановится последняя строка (доля высоты окна)
+  function scrollCol(col, p, endAt) {
+    const inner = col.firstElementChild;
+    const view = col.clientHeight;
+    const start = view * 0.95;
+    const end = endAt === undefined ? -inner.offsetHeight : view * endAt - inner.offsetHeight;
+    inner.style.setProperty("--y", lerp(start, end, p).toFixed(1) + "px");
+  }
+
   function updateLove() {
     if (!loveSec || !loveScene) return;
     const r = loveSec.getBoundingClientRect();
@@ -878,8 +990,9 @@
     if (r.bottom < 0 || r.top > vh) return;
     const hh = parseFloat(getComputedStyle(loveScene).top) || 0;
     const q = clamp01((hh - r.top) / Math.max(1, r.height - loveScene.offsetHeight));
+    const narrow = narrowMQ.matches;
 
-    // сообщения: перестраиваем только когда меняется их число (скролл назад тоже работает)
+    // переписка: перестраиваем, только когда меняется число сообщений (скролл назад тоже работает)
     let n = -1;
     SMS.forEach((m, i) => { if (q >= m.at) n = i; });
     if (n !== smsShown) {
@@ -895,31 +1008,44 @@
         smsList.appendChild(el);
       });
       smsShown = n;
+      smsClock.textContent = n >= 0 ? SMS[n].meta.split(" · ")[1] : "21:40";
       if (grew && phone && !reduce) phone.animate(
         [{ translate: "0 0" }, { translate: "-3px 0" }, { translate: "3px 0" }, { translate: "-2px 0" }, { translate: "0 0" }],
         { duration: 300 }
-      );   // телефон вздрагивает — вибрация
+      );   // вибрация
     }
 
     const d = draftAt(q);
     if (d !== lastDraft) { smsDraft.textContent = d; pressKey(); lastDraft = d; }
 
-    loveNotes.forEach((el) => {
-      const f = parseFloat(el.dataset.from);
-      let t = parseFloat(el.dataset.to);
-      // на узком экране мысли идут строго по одной: предыдущая уходит, когда приходит следующая
-      if (narrowMQ.matches) {
-        const next = loveNotes[loveNotes.indexOf(el) + 1];
-        if (next) t = Math.min(t, parseFloat(next.dataset.from) + 0.02);
-      }
-      const a = reduce ? (q >= f && q < t ? 1 : 0) : smooth(f, f + 0.05, q) * (1 - smooth(t - 0.05, t, q));
-      el.style.setProperty("--a", a.toFixed(3));
-    });
+    // текст: слева, потом справа
+    const pL = reduce ? (q < 0.47 ? 0.5 : 1) : clamp01((q - 0.03) / 0.44);
+    const pR = reduce ? (q > 0.52 ? 1 : 0) : clamp01((q - 0.52) / 0.38);
+    scrollCol(loveColL, pL);
+    scrollCol(loveColR, pR, 0.55);   // последняя фраза остаётся на экране
+    loveColL.style.visibility = q < 0.5 ? "visible" : "hidden";
+    loveColR.style.visibility = q > 0.5 ? "visible" : "hidden";
 
-    if (phone) {
-      phone.style.setProperty("--pry", (-18 + 30 * q).toFixed(1) + "deg");
-      phone.style.setProperty("--prx", (10 - 6 * q).toFixed(1) + "deg");
+    // телефон: растёт и уходит вправо, потом переезжает влево
+    if (phoneWrap) {
+      const side = Math.min(window.innerWidth * 0.23, 330);
+      const toRight = smooth(0, 0.08, q), toLeft = smooth(0.46, 0.56, q);
+      const x = narrow ? 0 : side * (toRight - 2 * toLeft);
+      const sc = narrow ? 1 : 1 + 0.14 * toRight;
+      phoneWrap.style.setProperty("--px", x.toFixed(1) + "px");
+      phoneWrap.style.setProperty("--ps", sc.toFixed(3));
+      // поворачивается к тексту
+      const turn = narrow ? 0 : (toRight - 2 * toLeft);
+      phone.style.setProperty("--pry", (-8 * turn + 4 * Math.sin(q * 6)).toFixed(1) + "deg");
+      phone.style.setProperty("--prx", (8 - 3 * q).toFixed(1) + "deg");
     }
+
+    // батарея садится вместе с ним; экран тускнеет; в конце — гаснет
+    const bat = clamp01(1 - q * 1.08);
+    smsBattery.style.setProperty("--bat", bat.toFixed(3));
+    phone.style.setProperty("--glow", clamp01(1 - smooth(0.6, 0.92, q) * 0.85).toFixed(3));
+    phone.classList.toggle("is-low", q > 0.84 && q < 0.93);
+    phone.classList.toggle("is-off", q >= 0.93);
   }
 
   /* ---------- Кнопки песен ---------- */
@@ -975,13 +1101,6 @@
       navLinks.forEach((a) => a.classList.remove("is-current"));
     }
   }
-
-  /* ---------- «С начала» ---------- */
-  const again = document.getElementById("toStart");
-  if (again) again.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
-    selectSong(START_SONG, { autoplay: true });
-  });
 
   /* ---------- Один общий цикл для скролла ---------- */
   let ticking = false;
