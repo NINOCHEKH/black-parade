@@ -2535,3 +2535,79 @@ html.is-gone .sources { animation: sources-in 2.4s ease both; }
   .tv-screen__content { transform: none; filter: none; }
   html.is-vanishing .header, html.is-vanishing .hero, html.is-vanishing .story, html.is-vanishing .chapters { animation-duration: .01s; }
 }
+
+/* =========================================================
+   ТЕЛЕФОН: крупнее текст, компактнее шапка, удобнее касания
+   ========================================================= */
+@media (max-width: 760px) {
+  :root { --header-h: 90px; }
+
+  /* меню: крупные пункты, лента прокручивается пальцем, справа — затухание-подсказка */
+  .nav {
+    height: 42px;
+    gap: 26px;
+    padding: 0 18px;
+    -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent);
+    mask-image: linear-gradient(90deg, #000 82%, transparent);
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+  }
+  .nav a { font-size: 15px; line-height: 42px; scroll-snap-align: start; }
+  .player { height: 48px; gap: 4px; }
+  .player__title { font-size: 13px; }
+  .player__controls { gap: 6px; }
+  .player__btn { width: 44px; height: 26px; }
+
+  /* вступление: без ручных переносов, нормальный размер */
+  .story { padding: 32px 22px 0; }
+  .story__stack { width: 100%; gap: 34px; }
+  .story__block br { display: none; }
+  .story__block--1 { font-size: 18px; line-height: 1.55; width: auto; }
+  .story__block--2 { font-size: 21px; line-height: 1.3; width: auto; }
+  .story__block--3 { font-size: 23px; line-height: 1.25; width: auto; }
+  .story__block--4 { font-size: 30px; line-height: 1.08; width: auto; }
+  .story__hint { font-size: 15px; bottom: 28px; }
+
+  /* титры */
+  .titles__about, .titles__people { font-size: 17px; }
+  .titles__kicker { font-size: 14px; }
+
+  /* заголовки глав и треки */
+  .chapter__head--compact .chapter__title { font-size: 40px; line-height: 1; }
+  .track-chip { font-size: 15px; max-width: calc(100vw - 32px); flex-wrap: wrap; row-gap: 2px; }
+  .track-chip--small { font-size: 15px; }
+  .track-chip__by, .track-chip__time { font-size: .8em; }
+
+  /* записки «Парада» */
+  .pcard__paper { font-size: 16px; }
+  .pcard--big .pcard__paper { font-size: 21px; }
+
+  /* стена текста за часами: только текущий абзац, читаемым размером */
+  .count-wall { inset: auto 20px 5% 20px; height: 50%; font-size: 17px !important; line-height: 1.5; text-align: left; hyphens: manual; }
+  .count-wall p { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; }
+  .count-wall p.is-past { opacity: 0; }
+  .count-wall p { transition-duration: 1.4s; }
+
+  /* телефон в «Я тебя не люблю»: крупнее, текст на экране — не меньше 11 px */
+  .love-stage { --ph: min(calc(100svh - var(--header-h) - 360px), 420px); }
+  .love-col { height: 36%; }
+  .love-col__inner { font-size: 17px; line-height: 1.5; }
+  .phone__screen { font-size: max(11px, calc(var(--pw) * .056)); }
+
+  /* «Мама» и «Последнее слово» */
+  .mama-line { font-size: 23px; line-height: 1.35; }
+  .mama-line.is-last { font-size: 28px; }
+  .last-line { font-size: 21px; line-height: 1.45; }
+  .ask-btn { font-size: 18px; padding: .7em 1.4em; }
+
+  /* вопрос и ответ */
+  .question__line--1 { font-size: 19px; }
+  .question__line--2 { font-size: 30px; }
+  .question__yes { font-size: 22px; min-width: 5em; padding: .55em 1.4em; }
+  .verdict__words p { font-size: 19px; }
+  .verdict__words p.is-big { font-size: 27px; }
+
+  /* источники и подвал */
+  .sources__list { font-size: 17px; }
+  .credits__names { font-size: 16px; }
+}

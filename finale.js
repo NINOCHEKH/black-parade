@@ -207,7 +207,7 @@
       before: [{ big: true, text: "Может быть." }, { text: "Я говорил себе, что делаю это ради неё. Как же я ошибался." }],
       type: "Знаешь, я тебя никогда и не любил. Хватит, оставь меня",
       send: true,
-      after: [{ text: "Не знаю, успело ли оно уйти." }],
+      after: [],
     },
   };
 
@@ -299,6 +299,7 @@
       await wait(1400);
     }
     for (const l of A.after) { say(l); await wait(3200); }
+    if (!A.after.length) await wait(1800);   // погасший экран ещё немного держится, потом всё исчезает
     vanishAll();
   }
 
@@ -349,6 +350,6 @@
   measure();
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", () => { geo = null; measure(); measureScroll(); });
+  window.addEventListener("layoutresize", () => { geo = null; measure(); measureScroll(); });
   requestAnimationFrame(frame);
 })();

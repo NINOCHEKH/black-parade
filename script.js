@@ -29,6 +29,27 @@ const TOP_ANGLE = -90;         // «центр» — луч смотрит ст�
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/* На телефоне адресная строка прячется и появляется при прокрутке — браузер считает это
+   изменением размера окна. Тяжёлые сцены перестраиваем только при настоящем изменении:
+   другая ширина (поворот, окно) или высота поменялась сильнее, чем на высоту адресной строки. */
+let __rw = window.innerWidth, __rh = window.innerHeight;
+window.addEventListener("resize", () => {
+  const w = window.innerWidth, h = window.innerHeight;
+  if (w !== __rw || Math.abs(h - __rh) > 160) {
+    __rw = w; __rh = h;
+    window.dispatchEvent(new Event("layoutresize"));
+  }
+});
+
+/* «Держим» страницу: пока идёт вступление или отсчёт, прокрутка выключена, а не отдёргивается назад */
+const __holds = new Set();
+window.holdScroll = function (key, on) {
+  if (on) __holds.add(key); else __holds.delete(key);
+  const v = __holds.size ? "hidden" : "";
+  document.documentElement.style.overflow = v;
+  document.body.style.overflow = v;
+};
+
 /* ---------- Круг с песнями ---------- */
 const wheel = document.getElementById("wheel");
 const spin = document.getElementById("wheelSpin");
@@ -150,7 +171,7 @@ function fitActiveScales() {
   });
 }
 
-window.addEventListener("resize", fitActiveScales);
+window.addEventListener("layoutresize", fitActiveScales);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitActiveScales);
 
 // круг плывёт, только когда экран альбома виден
@@ -507,11 +528,13 @@ function lockStory() {
   if (storyLocked || storyDone) return;
   storyLocked = true;
   window.scrollTo(0, storyTop());
+  window.holdScroll("story", true);
   if (storyStep < 0) advanceStory();
 }
 
 function unlockStory() {
   storyLocked = false;
+  window.holdScroll("story", false);
 }
 
 function canAdvance() {
@@ -547,13 +570,22 @@ window.addEventListener("touchstart", (e) => { touchStartY = e.touches[0].client
 window.addEventListener("touchmove", (e) => {
   if (!storyLocked || touchStartY === null) return;
   const dy = touchStartY - e.touches[0].clientY;  // > 0 — свайп вверх, то есть листаем вниз
-  if (dy < -10) { unlockStory(); return; }
+  if (dy < -70) { unlockStory(); return; }       // явный свайп вниз — отпускаем вступление
   e.preventDefault();
-  if (dy > 50 && canAdvance()) {
+  if (dy > 36 && canAdvance()) {
     touchStartY = e.touches[0].clientY;
     advanceStory();
   }
 }, { passive: false });
+
+// подстраховка: если браузер не прислал движение пальца, решаем по отпусканию
+window.addEventListener("touchend", (e) => {
+  if (!storyLocked || touchStartY === null || !e.changedTouches.length) return;
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  touchStartY = null;
+  if (dy < -70) { unlockStory(); return; }
+  if (dy > 36 && canAdvance()) advanceStory();
+}, { passive: true });
 
 window.addEventListener("keydown", (e) => {
   if (!storyLocked) return;

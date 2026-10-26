@@ -345,7 +345,7 @@
     layout();
     measure();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", () => { geo = null; layout(); measure(); });
+    window.addEventListener("layoutresize", () => { geo = null; layout(); measure(); });
     requestAnimationFrame(frame);
   });
 })();

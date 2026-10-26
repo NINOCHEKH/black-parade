@@ -17,7 +17,7 @@ function sceneGeo(sceneEl) {
   if (!g) { g = { top: parseFloat(getComputedStyle(sceneEl).top) || 0, h: sceneEl.offsetHeight }; __geo.set(sceneEl, g); }
   return g;
 }
-window.addEventListener("resize", () => { document.querySelectorAll("[id$=Scene], .countdown-scene").forEach((el) => __geo.delete(el)); }, { capture: true });
+window.addEventListener("layoutresize", () => { document.querySelectorAll("[id$=Scene], .countdown-scene").forEach((el) => __geo.delete(el)); }, { capture: true });
 function setVar(el, k, v) {
   if (!el) return;
   const c = el.__vars || (el.__vars = {});
@@ -142,7 +142,7 @@ function setVar(el, k, v) {
   let deadQ = 0, dis = 0, sceneVisible = false, appearV = 1;
   const lightEls = scene ? Array.from(scene.querySelectorAll(".desk, .light")) : [];
   let folderW = folder ? folder.offsetWidth : 0, folderH = folder ? folder.offsetHeight : 0;
-  window.addEventListener("resize", () => { if (folder) { folderW = folder.offsetWidth; folderH = folder.offsetHeight; } });
+  window.addEventListener("layoutresize", () => { if (folder) { folderW = folder.offsetWidth; folderH = folder.offsetHeight; } });
   let mode = "idle";                       // idle → opening → open → closing → idle
   const st = { ry: -20, rx: -6, ty: 0, open: 0, lift: 0, light: 0 };
   let animStart = 0, from = null, ryTarget = 0;
@@ -489,7 +489,7 @@ function setVar(el, k, v) {
   if (scene) {
     sizeDust();
     setDissolve(0);
-    window.addEventListener("resize", sizeDust);
+    window.addEventListener("layoutresize", sizeDust);
     requestAnimationFrame(deadLoop);
   }
 
@@ -757,6 +757,7 @@ function setVar(el, k, v) {
   // полотно подгоняется под экран: самый крупный шрифт, при котором текст помещается целиком
   function fitWall() {
     if (!cWall) return;
+    if (window.innerWidth <= 760) { cWall.style.fontSize = ""; return; }   // на телефоне — один абзац обычного размера
     let lo = 9, hi = 26;
     for (let i = 0; i < 9; i++) {
       const mid = (lo + hi) / 2;
@@ -834,12 +835,14 @@ function setVar(el, k, v) {
     clockArriving = false; clockArrive = 0;
     setVar(clockStage, "--ca", "0");
     cNoiseLevel = 0; setVar(cScene, "--noise", "0");
+    if (window.holdScroll) window.holdScroll("count", false);
   }
 
   function startCountdown() {
     cState = "run";
     cLockY = Math.round(window.scrollY + countSec.getBoundingClientRect().top - (parseFloat(getComputedStyle(cScene).top) || 0));
     window.scrollTo(0, cLockY);
+    if (window.holdScroll) window.holdScroll("count", true);   // страница стоит, пока идёт отсчёт
     cNum0 = 10; cElapsedBefore = 0;
     setClock(10, false);
     // часы выплывают из темноты; первая цифра держится, пока они не подъедут
@@ -863,6 +866,7 @@ function setVar(el, k, v) {
     lightWall(1);
     setVar(cScene, "--noise", "0");
     cFlashes.innerHTML = "";
+    if (window.holdScroll) window.holdScroll("count", false);
   }
   window.finishCountdown = () => { if (cState !== "done") finishCountdown(); };
 
@@ -912,7 +916,7 @@ function setVar(el, k, v) {
   window.addEventListener("touchstart", (e) => { cTouchY = e.touches[0].clientY; }, { passive: true });
   window.addEventListener("touchmove", (e) => {
     if (!countBlocks() || cTouchY === null) return;
-    if (e.touches[0].clientY - cTouchY > 12) { resetCountdown(); return; }
+    if (e.touches[0].clientY - cTouchY > 80) { resetCountdown(); return; }   // только явный свайп назад
     e.preventDefault();
   }, { passive: false });
   window.addEventListener("keydown", (e) => {
@@ -927,8 +931,12 @@ function setVar(el, k, v) {
     el.className = "flash" + (Math.random() < 0.2 + 0.4 * cProgress ? " flash--red" : "");
     el.textContent = tier[(Math.random() * tier.length) | 0];
     // в просвете между колонками текста — над часами и под ними, чтобы не закрывать полотно
-    const x = 0.32 + Math.random() * 0.22;
-    const y = Math.random() < 0.5 ? 0.04 + Math.random() * 0.14 : 0.8 + Math.random() * 0.12;
+    let x = 0.32 + Math.random() * 0.22;
+    let y = Math.random() < 0.5 ? 0.04 + Math.random() * 0.14 : 0.8 + Math.random() * 0.12;
+    if (window.innerWidth <= 760) {            // на телефоне — в просвете между часами и текстом
+      x = 0.05 + Math.random() * 0.25;
+      y = 0.27 + Math.random() * 0.13;
+    }
     el.style.left = (x * 100) + "%";
     el.style.top = (y * 100) + "%";
     const want = 13 + Math.random() * (8 + 12 * cNoiseLevel);
@@ -979,8 +987,8 @@ function setVar(el, k, v) {
     drawCountdown(now);
   }
   sizePShards(); sizeNoise();
-  window.addEventListener("resize", () => { if (cState !== "wait") fitWall(); });
-  window.addEventListener("resize", sizePShards);
+  window.addEventListener("layoutresize", () => { if (cState !== "wait") fitWall(); });
+  window.addEventListener("layoutresize", sizePShards);
   requestAnimationFrame(sceneLoop);
 
   /* ---------- Глава III: текст слева и справа, переписка, телефон садится ---------- */
@@ -1147,7 +1155,13 @@ function setVar(el, k, v) {
   const chapterObserver = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       if (!e.isIntersecting) return;
-      navLinks.forEach((a) => a.classList.toggle("is-current", a.getAttribute("href") === "#" + e.target.id));
+      navLinks.forEach((a) => {
+        const cur = a.getAttribute("href") === "#" + e.target.id;
+        a.classList.toggle("is-current", cur);
+        // на телефоне меню — лента: подкручиваем её к текущей главе
+        const nav = a.parentElement;
+        if (cur && nav && nav.scrollWidth > nav.clientWidth + 4) nav.scrollTo({ left: Math.max(0, a.offsetLeft - 18), behavior: reduce ? "auto" : "smooth" });
+      });
     });
   }, { rootMargin: "-45% 0px -50% 0px" });
   document.querySelectorAll(".chapter").forEach((c) => chapterObserver.observe(c));
@@ -1183,7 +1197,7 @@ function setVar(el, k, v) {
   }, { passive: true });
 
   setInterval(updateChips, 250);
-  window.addEventListener("resize", () => { updateDead(); updateParadeScene(); updateCountdown(); updateLove(); });
+  window.addEventListener("layoutresize", () => { updateDead(); updateParadeScene(); updateCountdown(); updateLove(); });
   updateDead();
   updateParadeScene();
   updateCountdown();
