@@ -3,23 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Добро пожаловать — Black Parade</title>
+  <title>Добро пожаловать — Black Parade</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Old Standard TT — запасной шрифт, если Broadsheet не подключён -->
-  <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&family=Caveat:wght@500;700&family=PT+Mono&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&family=Caveat:wght@500;700&family=PT+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <!-- ===== Шапка: меню + плеер ===== -->
-  <header class="header">
+  <header class="header is-intro">
     <nav class="nav" aria-label="Главы">
-      <a href="#dead">МЕРТВ</a>
-      <a href="#parade">ПАРАД</a>
-      <a href="#i-dont-love-you">Я ТЕБЯ НЕ ЛЮБЛЮ</a>
-      <a href="#mama">МАМА...</a>
-      <a href="#last-words">ПОСЛЕДНЕЕ СЛОВО</a>
+      <a href="#dead">«МЕРТВ»</a>
+      <a href="#parade">«ПАРАД»</a>
+      <a href="#i-dont-love-you">«Я ТЕБЯ НЕ ЛЮБЛЮ»</a>
+      <a href="#mama">«МАМА...»</a>
+      <a href="#last-words">«ПОСЛЕДНЕЕ СЛОВО»</a>
     </nav>
 
     <div class="player" id="player">
@@ -40,7 +40,33 @@
     </div>
   </header>
 
-  <!-- ===== Первый экран ===== -->
+  <!-- ===== Титры: держатся первые секунды и растворяются, потом начинается вступление ===== -->
+  <div class="titles" id="titles">
+    <p class="titles__kicker">лонгрид</p>
+    <h1 class="titles__name">«The Black Parade»</h1>
+    <p class="titles__about">по мотивам альбома My Chemical Romance «The Black Parade» (2006)</p>
+    <p class="titles__people">
+      <span>Чехерия Нино</span>
+      <span>Олег Пащенко</span>
+      <span>Б25ДЗ09</span>
+    </p>
+    <p class="titles__hint">лучше в наушниках</p>
+  </div>
+
+  <!-- ===== Второй блок: текст печатается, как на машинке =====
+       Пока не напечатаются все четыре фразы, страница дальше не листается.
+       Каждая новая фраза появляется по прокрутке, прошлые затухают. -->
+  <section class="story" id="story" aria-label="Вступление">
+    <div class="story__stack">
+      <p class="story__block story__block--1">Если ты меня слышишь, значит, я ещё здесь.</p>
+      <p class="story__block story__block--2">Хотя я не знаю, что значит «здесь». В этой комнате?<br>По ту сторону экрана? В словах, которые<br>ты сейчас произносишь про себя?</p>
+      <p class="story__block story__block--3">Я хотел начать с имени. Но ты всё равно сначала<br>услышал бы голос и представил кого-нибудь своего.</p>
+      <p class="story__block story__block--4">Побудь со мной. Мне нужно кое-что рассказать, пока я ещё помню, с чего всё началось.</p>
+    </div>
+    <p class="story__hint" aria-hidden="true">листай <span>↓</span></p>
+  </section>
+
+  <!-- ===== Парад: кивер, треклист, BLACK PARADE — после того, как читатель узнал героя ===== -->
   <section class="hero" aria-label="Black Parade">
     <!-- Фон-бумага (assets/hero-bg.jpg, если появится; без черепа — он отдельным слоем) -->
     <div class="hero__bg" aria-hidden="true"></div>
@@ -107,19 +133,6 @@
     </div>
   </section>
 
-  <!-- ===== Второй блок: текст печатается, как на машинке =====
-       Пока не напечатаются все четыре фразы, страница дальше не листается.
-       Каждая новая фраза появляется по прокрутке, прошлые затухают. -->
-  <section class="story" id="story" aria-label="Вступление">
-    <div class="story__stack">
-      <p class="story__block story__block--1">Если ты меня слышишь, значит, я ещё здесь.</p>
-      <p class="story__block story__block--2">Хотя я не знаю, что значит «здесь». В этой комнате?<br>По ту сторону экрана? В словах, которые<br>ты сейчас произносишь про себя?</p>
-      <p class="story__block story__block--3">Я хотел начать с имени. Но ты всё равно сначала<br>услышал бы голос и представил кого-нибудь своего.</p>
-      <p class="story__block story__block--4">Побудь со мной. Мне нужно кое-что рассказать, пока я ещё помню, с чего всё началось.</p>
-    </div>
-    <p class="story__hint" aria-hidden="true">листай <span>↓</span></p>
-  </section>
-
   <!-- =========================================================
        ГЛАВЫ. Порядок и якоря — как в меню.
        data-type-group — внутри строки data-type печатаются по очереди, когда блок появился на экране
@@ -135,7 +148,7 @@
     <section class="chapter chapter--dead" id="dead" aria-labelledby="t-dead">
       <div class="dead-scene" id="deadScene">
         <header class="chapter__head chapter__head--compact chapter__head--chip">
-          <button class="track-chip" type="button" data-song="Dead!"><span class="track-chip__icon" aria-hidden="true"></span>Dead! <span class="track-chip__time">— 3:16</span></button>
+          <button class="track-chip" type="button" data-song="Dead!"><span class="track-chip__icon" aria-hidden="true"></span><span class="track-chip__name">Dead!</span><span class="track-chip__by">My Chemical Romance</span><span class="track-chip__time">3:16</span></button>
         </header>
 
         <div class="desk" aria-hidden="true"></div>
@@ -150,7 +163,7 @@
               <div class="face face--top inner-right">
                 <div class="sleeve" aria-hidden="true"></div>
               </div>
-              <div class="face face--bottom folder-back"><span>№ 7</span></div>
+              <div class="face face--bottom folder-back"><span>№ 7</span></div>
               <div class="edge edge--right"></div>
               <div class="edge edge--top"></div>
               <div class="edge edge--bottom"></div>
@@ -190,7 +203,7 @@
                   <img class="cover__photo" src="assets/xray.webp" alt="">
                   <p class="cover__kicker">медицинская карта стационарного больного</p>
                   <p class="cover__title">ЛИЧНОЕ ДЕЛО</p>
-                  <p class="cover__sub">пациент № 7</p>
+                  <p class="cover__sub">пациент № 7</p>
                   <span class="cover__stamp">палата 4</span>
                 </div>
                 <div class="face face--bottom inner-left"></div>
@@ -206,7 +219,7 @@
                 <button class="doc doc--record" type="button" data-doc="record" aria-label="Выписка — прочитать">
                   <span class="doc__paper">
                     <span class="doc__tab">выписка</span>
-                    <span class="doc__title">Медицинская карта № 7</span>
+                    <span class="doc__title">Медицинская карта № 7</span>
                     <span class="doc__lines" aria-hidden="true"></span>
                   </span>
                 </button>
@@ -219,7 +232,7 @@
                 <button class="doc doc--note" type="button" data-doc="note" aria-label="Записка — прочитать">
                   <span class="doc__paper">
                     <span class="doc__tab">записка</span>
-                    <span class="doc__hand">мне сказали что у меня что-то в организме..</span>
+                    <span class="doc__hand">мне сказали что у меня что-то в организме..</span>
                   </span>
                 </button>
                 <div class="pocket__front" aria-hidden="true"></div>
@@ -238,9 +251,9 @@
 
         <!-- то, что остаётся, когда папка рассыпалась -->
         <div class="remains" id="remains">
-          <p class="remains__small">Всё это — бумага. Её можно потерять, сжечь, сдать в архив. Через год её перепутают с чужой, через десять — выбросят вместе с остальными.</p>
-          <p class="remains__big">Но есть то, что я до сих пор вспоминаю с&nbsp;теплотой.</p>
-          <p class="remains__small remains__small--late">Ни один врач не записал этого в карту: барабаны, солнце в витринах и отцовские плечи, с которых был виден весь город.</p>
+          <p class="remains__small">Всё это — бумага. Её можно потерять, сжечь, сдать в архив. Через год её перепутают с чужой, через десять — выбросят вместе с остальными.</p>
+          <p class="remains__big">Но есть то, что я до сих пор вспоминаю с&nbsp;теплотой.</p>
+          <p class="remains__small remains__small--late">Ни один врач не записал этого в карту: барабаны, солнце в витринах и отцовские плечи, с которых был виден весь город.</p>
         </div>
 
         <!-- фильтр «рассыпания»: шум съедает папку по мере скролла -->
@@ -262,17 +275,17 @@
       <article class="sheet sheet--record">
         <header class="sheet__head">
           <p>Городская клиническая больница · отделение онкологии</p>
-          <h3>Медицинская карта стационарного больного № 7</h3>
+          <h3>Медицинская карта стационарного больного № 7</h3>
         </header>
         <dl class="sheet__fields">
           <div><dt>Палата</dt><dd>4</dd></div>
           <div><dt>Дата поступления</dt><dd>14 октября</dd></div>
-          <div><dt>Возраст</dt><dd>не указан</dd></div>
-          <div><dt>Жалобы</dt><dd>слабость, бессонница, «шум барабанов по ночам»</dd></div>
+          <div><dt>Возраст</dt><dd>не указан</dd></div>
+          <div><dt>Жалобы</dt><dd>слабость, бессонница, «шум барабанов по ночам»</dd></div>
           <div><dt>Диагноз</dt><dd><span class="redacted">██████████████</span></dd></div>
-          <div><dt>Назначено</dt><dd>наблюдение, обезболивание по требованию</dd></div>
+          <div><dt>Назначено</dt><dd>наблюдение, обезболивание по требованию</dd></div>
         </dl>
-        <p class="sheet__note"><b>Примечание лечащего врача:</b> пациент спокоен, много пишет, от бесед с психологом отказывается. Просит не задёргивать шторы и не выключать свет в коридоре. Посетители — по вторникам.</p>
+        <p class="sheet__note"><b>Примечание лечащего врача:</b> пациент спокоен, много пишет, от бесед с психологом отказывается. Просит не задёргивать шторы и не выключать свет в коридоре. Посетители — по вторникам.</p>
         <p class="sheet__sign">Лечащий врач ____________ <span class="sheet__stamp">копия верна</span></p>
       </article>
     </template>
@@ -282,17 +295,17 @@
         <img src="assets/xray.webp" alt="Рентгеновский снимок грудной клетки">
         <span class="xray__mark xray__mark--r">R</span>
         <span class="xray__mark xray__mark--id">№7 · 14.10</span>
-        <p class="xray__caption">Снимок приложен к карте. Красным — то, о чём мне так и не сказали вслух.</p>
+        <p class="xray__caption">Снимок приложен к карте. Красным — то, о чём мне так и не сказали вслух.</p>
       </article>
     </template>
 
     <template id="doc-note">
       <article class="sheet sheet--note">
-        <p>мне сказали что у меня что-то в организме..</p>
-        <p>Врач говорил долго и мягко, как говорят с ребёнком, который разбил что-то очень дорогое. Слов я не запомнил. Запомнил, как он снял очки и протёр их, хотя они были чистыми.</p>
-        <p>Потом была палата. Белый потолок, на котором я выучил каждую трещину, как карту города, куда уже не поеду.</p>
-        <p>Мир не остановился. За окном кто-то парковался, кто-то ругался по телефону, кто-то смеялся. А я лежал и думал: неужели вот так — и всё?</p>
-        <p class="sheet__ps">P.S. Если найдёшь это — не выбрасывай. Пусть останется хоть где-то.</p>
+        <p>мне сказали что у меня что-то в организме..</p>
+        <p>Врач говорил долго и мягко, как говорят с ребёнком, который разбил что-то очень дорогое. Слов я не запомнил. Запомнил, как он снял очки и протёр их, хотя они были чистыми.</p>
+        <p>Потом была палата. Белый потолок, на котором я выучил каждую трещину, как карту города, куда уже не поеду.</p>
+        <p>Мир не остановился. За окном кто-то парковался, кто-то ругался по телефону, кто-то смеялся. А я лежал и думал: неужели вот так — и всё?</p>
+        <p class="sheet__ps">P.S. Если найдёшь это — не выбрасывай. Пусть останется хоть где-то.</p>
       </article>
     </template>
 
@@ -312,8 +325,8 @@
       <div class="parade-scene" id="paradeScene">
         <div class="parade-dim" aria-hidden="true"></div>
         <header class="chapter__head chapter__head--compact">
-          <h2 class="chapter__title" id="t-parade">ПАРАД</h2>
-          <button class="track-chip" type="button" data-song="Welcome to the Black Parade"><span class="track-chip__icon" aria-hidden="true"></span>Welcome to the Black Parade <span class="track-chip__time">— 5:11</span></button>
+          <h2 class="chapter__title" id="t-parade">«ПАРАД»</h2>
+          <button class="track-chip" type="button" data-song="Welcome to the Black Parade"><span class="track-chip__icon" aria-hidden="true"></span><span class="track-chip__name">Welcome to the Black Parade</span><span class="track-chip__by">My Chemical Romance</span><span class="track-chip__time">5:11</span></button>
         </header>
 
         <div class="tv-stage" aria-hidden="true">
@@ -365,50 +378,49 @@
           <div class="pcard-wrap pcard-wrap--l" data-card="0">
             <div class="pcard">
               <div class="pcard__paper">
-                <p>Мне было шесть, когда отец впервые взял меня на парад. Я помню его руки — тёплые, пахнущие табаком, — и как высоко вдруг стало, когда он поднял меня на плечи.</p>
+                <p>Мне было шесть, когда отец впервые взял меня на парад. Я помню его руки — тёплые, пахнущие табаком, — и как высоко вдруг стало, когда он поднял меня на плечи.</p>
               </div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--r" data-card="1">
             <div class="pcard">
               <div class="pcard__paper">
-                <p>Оркестр шёл по главной улице. Барабаны били так, что дрожали витрины, а медные трубы горели на солнце. Мне казалось, что ничего красивее на свете не бывает.</p>
+                <p>Оркестр шёл по главной улице. Барабаны били так, что дрожали витрины, а медные трубы горели на солнце. Мне казалось, что ничего красивее на свете не бывает.</p>
               </div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--l" data-card="2">
             <div class="pcard">
               <div class="pcard__paper">
-                <p>Отец наклонился и сказал: «Запомни этот день». Я запомнил. Кажется, это единственное его наставление, которое я выполнил до конца.</p>
+                <p>Отец наклонился и сказал: «Запомни этот день». Я запомнил. Кажется, это единственное его наставление, которое я выполнил до конца.</p>
               </div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--r" data-card="3">
             <div class="pcard">
               <div class="pcard__paper">
-                <p>Потом было много всего: школа, ссоры, первая любовь, работа, которую я ненавидел. Парад остался где-то на дне, под всеми этими годами.</p>
+                <p>Потом было много всего: школа, ссоры, первая любовь, работа, которую я ненавидел. Парад остался где-то на дне, под всеми этими годами.</p>
               </div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--l" data-card="4">
             <div class="pcard">
               <div class="pcard__paper">
-                <p>А теперь, когда за мной пришли, они пришли именно так. Не тьма и не тоннель со светом в конце. Чёрные мундиры, высокие кивера, белые перья.</p>
+                <p>А теперь, когда за мной пришли, они пришли именно так. Не тьма и не тоннель со светом в конце. Чёрные мундиры, высокие кивера, белые перья.</p>
               </div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--r" data-card="5">
             <div class="pcard">
               <div class="pcard__paper">
-                <p>Они маршируют по больничному коридору, и никто, кроме меня, их не слышит. Медсёстры проходят сквозь строй и не замечают его.</p>
+                <p>Они маршируют по больничному коридору, и никто, кроме меня, их не слышит. Медсёстры проходят сквозь строй и не замечают его.</p>
               </div>
             </div>
           </div>
           <div class="pcard-wrap pcard-wrap--l" data-card="6">
             <div class="pcard pcard--big">
               <div class="pcard__paper">
-                <p>Смерть пришла за мной в образе самого счастливого моего воспоминания.</p>
-                <button class="track-chip track-chip--small" type="button" data-song="The Sharpest Lives"><span class="track-chip__icon" aria-hidden="true"></span>The Sharpest Lives <span class="track-chip__time">— 3:21</span></button>
+                <p>Смерть пришла за мной в образе самого счастливого моего воспоминания.</p>
               </div>
             </div>
           </div>
@@ -426,13 +438,13 @@
         <canvas class="countdown__noise" id="countNoise" aria-hidden="true"></canvas>
         <!-- полотно текста позади часов: абзацы проступают из темноты по ходу отсчёта -->
         <div class="count-wall" id="countWall">
-          <p>Я всегда думал, что у меня будет больше времени. Не обязательно на что-то великое. Просто на то, чтобы однажды стать человеком, которым я хотел быть. Исправить то, что сломал. Вернуться к разговорам, которые оборвал. Попросить прощения у тех, кто давно перестал его ждать.</p>
-          <p>Мне казалось, что жизнь — это черновик, который однажды можно будет переписать набело. Что ошибки перестанут иметь значение, когда я стану старше, мудрее, лучше. Но годы проходили, а я продолжал совершать их. Иногда одни и те же. Я научился находить объяснения своим поступкам, но так и не научился отвечать за их последствия.</p>
-          <p>Теперь я понимаю, что жизнь не состоит из отдельных правильных и неправильных решений. Одно неверное слово может изменить чью-то судьбу. Одно непроизнесённое «прости» — превратиться в годы молчания. И самое страшное, что в тот момент ты даже не замечаешь, как что-то важное заканчивается. Ты просто продолжаешь жить, уверенный, что ещё успеешь всё исправить.</p>
-          <p>А потом наступает день, когда будущего становится меньше, чем прошлого. И ты впервые понимаешь, что некоторые двери закрылись не вчера. Они были закрыты годами, просто ты всё это время обещал себе однажды вернуться.</p>
-          <p>Я пытался вспомнить, когда именно свернул не туда. Но, наверное, такого момента не было. Были сотни маленьких решений, каждое из которых казалось незначительным. Я выбирал себя, когда нужно было остаться. Уходил, когда стоило поговорить. Молчал, когда кто-то ждал от меня хотя бы одного слова.</p>
-          <p>И всё же я не хочу, чтобы моя жизнь оказалась лишь перечнем сожалений. Ведь между всеми этими ошибками было что-то настоящее. Я любил, даже если не всегда умел это показать. Я пытался быть лучше, пусть иногда слишком поздно. Я был счастлив в мгновения, которые тогда казались обыкновенными.</p>
-          <p>Возможно, смысл жизни не в том, чтобы прожить её без ошибок. А в том, чтобы однажды суметь признать их своими, не пытаясь выдать себя за того, кем никогда не был.</p>
+          <p>Я всегда думал, что у меня будет больше времени. Не обязательно на что-то великое. Просто на то, чтобы однажды стать человеком, которым я хотел быть. Исправить то, что сломал. Вернуться к разговорам, которые оборвал. Попросить прощения у тех, кто давно перестал его ждать.</p>
+          <p>Мне казалось, что жизнь — это черновик, который однажды можно будет переписать набело. Что ошибки перестанут иметь значение, когда я стану старше, мудрее, лучше. Но годы проходили, а я продолжал совершать их. Иногда одни и те же. Я научился находить объяснения своим поступкам, но так и не научился отвечать за их последствия.</p>
+          <p>Теперь я понимаю, что жизнь не состоит из отдельных правильных и неправильных решений. Одно неверное слово может изменить чью-то судьбу. Одно непроизнесённое «прости» — превратиться в годы молчания. И самое страшное, что в тот момент ты даже не замечаешь, как что-то важное заканчивается. Ты просто продолжаешь жить, уверенный, что ещё успеешь всё исправить.</p>
+          <p>А потом наступает день, когда будущего становится меньше, чем прошлого. И ты впервые понимаешь, что некоторые двери закрылись не вчера. Они были закрыты годами, просто ты всё это время обещал себе однажды вернуться.</p>
+          <p>Я пытался вспомнить, когда именно свернул не туда. Но, наверное, такого момента не было. Были сотни маленьких решений, каждое из которых казалось незначительным. Я выбирал себя, когда нужно было остаться. Уходил, когда стоило поговорить. Молчал, когда кто-то ждал от меня хотя бы одного слова.</p>
+          <p>И всё же я не хочу, чтобы моя жизнь оказалась лишь перечнем сожалений. Ведь между всеми этими ошибками было что-то настоящее. Я любил, даже если не всегда умел это показать. Я пытался быть лучше, пусть иногда слишком поздно. Я был счастлив в мгновения, которые тогда казались обыкновенными.</p>
+          <p>Возможно, смысл жизни не в том, чтобы прожить её без ошибок. А в том, чтобы однажды суметь признать их своими, не пытаясь выдать себя за того, кем никогда не был.</p>
         </div>
         <div class="countdown__flashes" id="countFlashes" aria-hidden="true"></div>
         <canvas class="countdown__noise countdown__noise--over" id="countNoiseOver" aria-hidden="true"></canvas>
@@ -473,28 +485,28 @@
     <section class="chapter chapter--love" id="i-dont-love-you" aria-labelledby="t-love">
       <div class="love-scene" id="loveScene">
         <header class="chapter__head chapter__head--compact">
-          <h2 class="chapter__title" id="t-love">Я ТЕБЯ НЕ ЛЮБЛЮ</h2>
-          <button class="track-chip" type="button" data-song="I Don't Love You"><span class="track-chip__icon" aria-hidden="true"></span>I Don't Love You <span class="track-chip__time">— 3:59</span></button>
+          <h2 class="chapter__title" id="t-love">«Я ТЕБЯ НЕ ЛЮБЛЮ»</h2>
+          <button class="track-chip" type="button" data-song="I Don't Love You"><span class="track-chip__icon" aria-hidden="true"></span><span class="track-chip__name">I Don't Love You</span><span class="track-chip__by">My Chemical Romance</span><span class="track-chip__time">3:59</span></button>
         </header>
 
         <div class="love-stage">
           <!-- текст сначала идёт слева, телефон справа; потом наоборот -->
           <div class="love-col love-col--l" id="loveColL">
             <div class="love-col__inner">
-              <p>Она приходила по вторникам. Я узнавал её шаги в коридоре раньше, чем открывалась дверь: быстрые, чуть сбивчивые, будто она всё время боялась опоздать.</p>
-              <p>Она приносила апельсины, хотя я давно не мог их есть, и чистила их сама — просто чтобы в палате пахло чем-то, кроме лекарств.</p>
-              <p>Мы почти не говорили о болезни. Она рассказывала про соседей, про кота, про сериал, который мы так и не досмотрели. Я слушал и считал, сколько вторников у нас осталось.</p>
-              <p>Уходя, она каждый раз говорила «до вторника». Так говорят, когда уверены, что вторник наступит.</p>
-              <p class="love-col__accent">Я начал бояться вторников.</p>
+              <p>Она приходила по вторникам. Я узнавал её шаги в коридоре раньше, чем открывалась дверь: быстрые, чуть сбивчивые, будто она всё время боялась опоздать.</p>
+              <p>Она приносила апельсины, хотя я давно не мог их есть, и чистила их сама — просто чтобы в палате пахло чем-то, кроме лекарств.</p>
+              <p>Мы почти не говорили о болезни. Она рассказывала про соседей, про кота, про сериал, который мы так и не досмотрели. Я слушал и считал, сколько вторников у нас осталось.</p>
+              <p>Уходя, она каждый раз говорила «до вторника». Так говорят, когда уверены, что вторник наступит.</p>
+              <p class="love-col__accent">Я начал бояться вторников.</p>
             </div>
           </div>
           <div class="love-col love-col--r" id="loveColR">
             <div class="love-col__inner">
-              <p>Я понимал, к чему всё идёт. И понимал, что она останется рядом до самого конца — смотреть, как я перестаю быть собой.</p>
-              <p>Я не хотел, чтобы последним, что она запомнит, стала эта палата: трубки, запах хлорки, человек, который с трудом узнаёт её голос.</p>
-              <p>Поэтому я написал то, что написал. Печатал, глядя в стену. Если бы посмотрел на её фотографию — не смог бы нажать «отправить».</p>
-              <p>Это была самая честная ложь в моей жизни.</p>
-              <p class="love-col__big">Пусть лучше она злится на живого, чем плачет над мёртвым.</p>
+              <p>Я понимал, к чему всё идёт. И понимал, что она останется рядом до самого конца — смотреть, как я перестаю быть собой.</p>
+              <p>Я не хотел, чтобы последним, что она запомнит, стала эта палата: трубки, запах хлорки, человек, который с трудом узнаёт её голос.</p>
+              <p>Поэтому я написал то, что написал. Печатал, глядя в стену. Если бы посмотрел на её фотографию — не смог бы нажать «отправить».</p>
+              <p>Это была самая честная ложь в моей жизни.</p>
+              <p class="love-col__big">Пусть лучше она злится на живого, чем плачет над мёртвым.</p>
             </div>
           </div>
 
@@ -520,75 +532,83 @@
     </section>
 
     <!-- ===== IV. МАМА... =====
-         Письмо маме сложено в кольца текста. Сверху падают неотправленные письма, горят
-         и на лету расталкивают строки в стороны. Кольца проявляются по мере скролла. -->
+         Письмо маме читается по одной строке: строка стоит в центре неподвижно.
+         Прочитанная строка уходит в тусклое кольцо, а сверху падает и сгорает неотправленное письмо. -->
     <section class="chapter chapter--mama" id="mama" aria-labelledby="t-mama">
       <div class="mama-scene" id="mamaScene">
         <header class="chapter__head chapter__head--compact">
-          <h2 class="chapter__title" id="t-mama">МАМА...</h2>
-          <button class="track-chip" type="button" data-song="Disenchanted"><span class="track-chip__icon" aria-hidden="true"></span>Disenchanted <span class="track-chip__time">— 4:55</span></button>
+          <h2 class="chapter__title" id="t-mama">«МАМА...»</h2>
+          <button class="track-chip" type="button" data-song="Disenchanted"><span class="track-chip__icon" aria-hidden="true"></span><span class="track-chip__name">Disenchanted</span><span class="track-chip__by">My Chemical Romance</span><span class="track-chip__time">4:55</span></button>
         </header>
         <canvas class="mama-canvas" id="mamaCanvas" aria-hidden="true"></canvas>
-        <!-- текст письма для чтения с экранного диктора; на холсте — он же, по кольцам -->
+        <!-- текущая строка письма: стоит неподвижно в центре, пока её читают -->
+        <p class="mama-line" id="mamaLine" aria-hidden="true"></p>
+        <!-- текст письма для чтения с экранного диктора; на экране — по одной строке, прочитанные уходят в кольца -->
         <div class="sr-only" id="mamaLetter">
-          <p data-ring>Мама, я так и не научился писать тебе письма. Звонил и молчал в трубку, а ты всё равно понимала, что я хотел сказать.</p>
-          <p data-ring>Прости за все двери, которыми я хлопал, и за все «потом», которые так и не наступили.</p>
-          <p data-ring>Прости, что про больницу ты узнала не от меня.</p>
-          <p data-ring>Я помню, как ты пела на кухне, думая, что никто не слышит.</p>
+          <p data-ring>Мама, я так и не научился писать тебе письма. Звонил и молчал в трубку, а ты всё равно понимала, что я хотел сказать.</p>
+          <p data-ring>Прости за все двери, которыми я хлопал, и за все «потом», которые так и не наступили.</p>
+          <p data-ring>Прости, что про больницу ты узнала не от меня.</p>
+          <p data-ring>Я помню, как ты пела на кухне, думая, что никто не слышит.</p>
           <p data-ring>Если там что-то есть, пусть там звучит это.</p>
-          <p data-ring>Не выходи на улицу, когда услышишь барабаны.</p>
-          <p data-center>Тебе ещё рано на этот парад.</p>
+          <p data-ring>Не выходи на улицу, когда услышишь барабаны.</p>
+          <p data-center>Тебе ещё рано на этот парад.</p>
         </div>
       </div>
     </section>
 
     <!-- ===== V. ПОСЛЕДНЕЕ СЛОВО =====
-         Его последний текст кружится в глубине. Через некоторое время внизу появляется кнопка;
-         она открывает вопрос. Ответ «да» уползает; на третий раз он благодарит, и лонгрид исчезает. -->
+         Он говорит по одному отрывку: текущий стоит в центре, уже сказанное уходит в вихрь позади.
+         Через три секунды после последних слов внизу появляется кнопка, она открывает вопрос. -->
     <section class="chapter chapter--last" id="last-words" aria-labelledby="t-last">
       <div class="last-scene" id="lastScene">
         <header class="chapter__head chapter__head--compact">
-          <h2 class="chapter__title" id="t-last">ПОСЛЕДНЕЕ СЛОВО</h2>
-          <button class="track-chip" type="button" data-song="Famous Last Words"><span class="track-chip__icon" aria-hidden="true"></span>Famous Last Words <span class="track-chip__time">— 4:59</span></button>
+          <h2 class="chapter__title" id="t-last">«ПОСЛЕДНЕЕ СЛОВО»</h2>
+          <button class="track-chip" type="button" data-song="Famous Last Words"><span class="track-chip__icon" aria-hidden="true"></span><span class="track-chip__name">Famous Last Words</span><span class="track-chip__by">My Chemical Romance</span><span class="track-chip__time">4:59</span></button>
         </header>
         <div class="vortex" id="vortex" aria-hidden="true"></div>
-        <button class="ask-btn" id="askBtn" type="button" hidden>ответь мне на вопрос</button>
-        <!-- тот же текст обычными абзацами — для экранного диктора; на экране он кружится в вихре -->
+        <button class="ask-btn" id="askBtn" type="button" hidden>ответь мне на вопрос</button>
+        <p class="last-line" id="lastLine" aria-hidden="true"></p>
+        <!-- тот же текст обычными абзацами — для экранного диктора; на экране — по отрывку -->
         <div class="sr-only" id="lastText">
-          <p>Странно, как много времени мы тратим на то, чтобы нас запомнили, и как мало — на то, чтобы понять, кем мы были на самом деле.</p>
-          <p>Я всегда думал, что в конце смогу оглянуться назад и увидеть какую-то цельную историю. Что все мои ошибки, поступки и решения наконец обретут смысл. Что я пойму, ради чего всё это было. Но теперь, когда времени почти не осталось, я вижу лишь отдельные моменты. Людей, которых любил, но не умел беречь. Слова, которые так и не произнёс. Обещания, о которых давно забыли все, кроме меня.</p>
-          <p>Я не был жестоким человеком. По крайней мере, мне хочется в это верить. Но разве достаточно не желать никому зла, чтобы считать себя хорошим? Сколько раз я причинял боль, даже не замечая этого? Сколько раз выбирал собственное спокойствие вместо чужого счастья? И сколько добрых поступков нужно совершить, чтобы однажды перестать чувствовать вину?</p>
-          <p>Говорят, после смерти от человека остаётся память. Но у каждого, кто меня знал, будет своя версия меня. Для кого-то я был причиной улыбки. Для кого-то — разочарованием. Кто-то будет скучать, а кто-то почувствует облегчение. И все они будут по-своему правы.</p>
-          <p>Наверное, больше всего меня пугает не сама смерть. А то, что я так и не узнаю, кем был в глазах других. Ведь я всю жизнь смотрел на себя изнутри, оправдывал свои ошибки намерениями, которых никто не видел, и прощал себе то, за что, возможно, не простил бы другого.</p>
-          <p>Поэтому сейчас, когда мне больше нечего доказывать и не у кого просить прощения, я хочу спросить тебя об одном.</p>
+          <p>Странно, как много времени мы тратим на то, чтобы нас запомнили, и как мало — на то, чтобы понять, кем мы были на самом деле.</p>
+          <p>Я всегда думал, что в конце смогу оглянуться назад и увидеть какую-то цельную историю. Что все мои ошибки, поступки и решения наконец обретут смысл. Что я пойму, ради чего всё это было. Но теперь, когда времени почти не осталось, я вижу лишь отдельные моменты. Людей, которых любил, но не умел беречь. Слова, которые так и не произнёс. Обещания, о которых давно забыли все, кроме меня.</p>
+          <p>Я не был жестоким человеком. По крайней мере, мне хочется в это верить. Но разве достаточно не желать никому зла, чтобы считать себя хорошим? Сколько раз я причинял боль, даже не замечая этого? Сколько раз выбирал собственное спокойствие вместо чужого счастья? И сколько добрых поступков нужно совершить, чтобы однажды перестать чувствовать вину?</p>
+          <p>Говорят, после смерти от человека остаётся память. Но у каждого, кто меня знал, будет своя версия меня. Для кого-то я был причиной улыбки. Для кого-то — разочарованием. Кто-то будет скучать, а кто-то почувствует облегчение. И все они будут по-своему правы.</p>
+          <p>Наверное, больше всего меня пугает не сама смерть. А то, что я так и не узнаю, кем был в глазах других. Ведь я всю жизнь смотрел на себя изнутри, оправдывал свои ошибки намерениями, которых никто не видел, и прощал себе то, за что, возможно, не простил бы другого.</p>
+          <p>Поэтому сейчас, когда мне больше нечего доказывать и не у кого просить прощения, я хочу спросить тебя об одном.</p>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- Вопрос: открывается кнопкой «ответь мне на вопрос» -->
+  <!-- Вопрос: открывается кнопкой «ответь мне на вопрос».
+       Спрашивает о конкретном поступке, который читатель видел в главе «Я ТЕБЯ НЕ ЛЮБЛЮ».
+       После ответа возвращается телефон с той перепиской, и герой отвечает на выбор по-своему. -->
   <div class="question" id="question" role="dialog" aria-modal="true" aria-labelledby="questionText" hidden>
     <p class="question__text" id="questionText">
-      <span class="question__line question__line--1">Ты узнал меня всего…</span>
-      <span class="question__line question__line--2">Скажи честно: был ли я хорошим человеком?</span>
+      <span class="question__line question__line--1">Ты видел, что я написал ей той ночью.</span>
+      <span class="question__line question__line--2">Скажи честно: я правильно сделал?</span>
     </p>
     <div class="question__answers">
       <button class="question__yes" id="yesBtn" type="button">да</button>
       <button class="question__yes question__no" id="noBtn" type="button">нет</button>
     </div>
-    <p class="question__thanks" id="thanks" aria-live="polite"></p>
+    <div class="verdict" id="verdict" aria-live="polite">
+      <div class="verdict__phone" id="verdictPhone" aria-hidden="true"></div>
+      <div class="verdict__words" id="verdictWords"></div>
+    </div>
   </div>
 
   <!-- Источники: остаются последними, даже когда лонгрид исчезнет -->
   <section class="sources" id="sources" aria-labelledby="t-sources">
     <h2 class="sources__title" id="t-sources">Источники</h2>
     <ul class="sources__list">
-      <li>My Chemical Romance. <i>The Black Parade</i>. — Reprise Records, 2006. <a href="https://en.wikipedia.org/wiki/The_Black_Parade" target="_blank" rel="noopener">Об альбоме — Википедия</a></li>
+      <li>My Chemical Romance. <i>The Black Parade</i>. — Reprise Records, 2006. <a href="https://en.wikipedia.org/wiki/The_Black_Parade" target="_blank" rel="noopener">Об альбоме — Википедия</a></li>
       <li>Фрагменты песен альбома: Dead!, This Is How I Disappear, The Sharpest Lives, Welcome to the Black Parade, I Don’t Love You, Cancer, Disenchanted, Famous Last Words, The End. Права принадлежат правообладателям.</li>
-      <li>Официальный сайт группы — <a href="https://www.mychemicalromance.com" target="_blank" rel="noopener">mychemicalromance.com</a></li>
-      <li>Шрифты Old Standard TT, Caveat, PT Mono и Oswald — <a href="https://fonts.google.com" target="_blank" rel="noopener">Google Fonts</a></li>
-      <li>Дизайн-макет «Добро пожаловать» и изображения — материалы автора проекта.</li>
-      <li>История пациента — художественный текст по мотивам концепции альбома. Все совпадения с реальными людьми случайны.</li>
+      <li>Официальный сайт группы — <a href="https://www.mychemicalromance.com" target="_blank" rel="noopener">mychemicalromance.com</a></li>
+      <li>Шрифты Broadsheet (из макета), Old Standard TT, Caveat и PT Mono — <a href="https://fonts.google.com" target="_blank" rel="noopener">Google Fonts</a></li>
+      <li>Дизайн-макет «Добро пожаловать» и изображения — материалы автора проекта.</li>
+      <li>История пациента — художественный текст по мотивам концепции альбома. Все совпадения с реальными людьми случайны.</li>
     </ul>
     <button class="sources__again" id="readAgain" type="button" hidden>перечитать</button>
   </section>

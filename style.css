@@ -28,6 +28,8 @@
 *::after { box-sizing: border-box; }
 
 html, body { margin: 0; }
+/* браузер не двигает прокрутку сам, когда меняется содержимое выше экрана */
+html { overflow-anchor: none; scrollbar-gutter: stable; }
 
 body {
   background: var(--black);
@@ -143,8 +145,11 @@ button {
 .player__progress span {
   display: block;
   height: 100%;
-  width: 0;
+  width: 100%;
   background: var(--red);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  will-change: transform;
 }
 
 /* ===================== Первый экран ===================== */
@@ -194,6 +199,7 @@ button {
   pointer-events: none;
 }
 
+.hero { isolation: isolate; }
 .hero__screen {
   position: absolute;
   left: 0;
@@ -216,6 +222,7 @@ button {
      остальные браузеры берут multiply — он выглядит очень близко */
   mix-blend-mode: multiply;
   mix-blend-mode: plus-darker;
+  will-change: transform;
 }
 
 /* Ширина и смещение — как у картинок в макете (534 и 584 px) */
@@ -421,6 +428,78 @@ button {
   line-height: 1.2;
 }
 
+/* ===================== Вход: фигура в пустоте и голос героя ===================== */
+.entry {
+  position: relative;
+  min-height: calc(100vh - var(--header-h));
+  min-height: calc(100svh - var(--header-h));
+  display: grid;
+  grid-template-rows: 1fr auto;
+  justify-items: center;
+  gap: max(28px, calc(40 * var(--u)));
+  padding: max(40px, calc(70 * var(--u))) 20px max(48px, calc(80 * var(--u)));
+  background: radial-gradient(ellipse 34% 40% at 50% 34%, rgba(255, 255, 255, .06), rgba(0, 0, 0, 0) 70%), #000;
+  overflow: hidden;
+}
+/* одна целая фигура и много воздуха вокруг */
+.entry__figure {
+  position: relative;
+  align-self: end;
+  height: min(40vh, 360px);
+  aspect-ratio: 60 / 200;
+}
+.entry__figure .marcher { width: 100%; height: 100%; }
+.entry__figure::after {   /* тень под ногами */
+  content: "";
+  position: absolute;
+  left: -40%;
+  right: -40%;
+  bottom: -3%;
+  height: 7%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, .35), rgba(0, 0, 0, 0));
+}
+/* светлое пятно за фигурой — как луч прожектора: чёрный силуэт читается целиком */
+.entry__figure::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 260%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #f2f1ed 0%, rgba(242, 241, 237, .92) 46%, rgba(242, 241, 237, .25) 78%, rgba(242, 241, 237, 0) 100%);
+  z-index: -1;
+}
+.entry__figure { z-index: 0; isolation: isolate; }
+.entry__text { max-width: 620px; text-align: center; }
+.entry__line {
+  margin: 0;
+  font-weight: 400;
+  font-size: max(30px, calc(52 * var(--u)));
+  line-height: 1.08;
+  color: #fff;
+}
+.entry__ask {
+  margin: .9em auto 0;
+  max-width: 30em;
+  font-size: max(17px, calc(22 * var(--u)));
+  line-height: 1.4;
+  color: #fff;
+}
+.entry__note {
+  margin: 2.2em auto 0;
+  max-width: 36em;
+  font-size: max(13px, calc(15 * var(--u)));
+  line-height: 1.5;
+  color: #fff;
+}
+.entry__line, .entry__ask, .entry__note, .entry__figure { animation: entry-in 2.4s ease both; }
+.entry__ask { animation-delay: 1.2s; }
+.entry__note { animation-delay: 2.2s; }
+@keyframes entry-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
 /* ===================== Второй блок: печатная машинка ===================== */
 .story {
   position: relative;
@@ -587,7 +666,10 @@ button {
   background: linear-gradient(90deg, currentColor 0 35%, transparent 35% 65%, currentColor 65%);
 }
 
-.track-chip__time { opacity: .75; }
+.track-chip__name { font-style: normal; }
+.track-chip__by { opacity: .8; font-size: .82em; }
+.track-chip__by::before { content: "— "; }
+.track-chip__time { opacity: .75; font-size: .82em; padding-left: .2em; border-left: 1px solid rgba(255, 255, 255, .4); margin-left: .1em; padding-left: .55em; }
 .track-chip--small { font-size: max(12px, calc(15 * var(--u))); }
 
 /* --- Проявление и печать --- */
@@ -713,13 +795,14 @@ button {
   z-index: 3;
   pointer-events: none;
 }
-/* слои шире экрана: двигаем их целиком — это дёшево для браузера */
+/* слои чуть шире экрана (свет качается всего на пару десятков пикселей): двигаем их целиком */
 .light__dark, .light__pool {
   position: absolute;
-  left: -100%;
-  top: -100%;
-  width: 300%;
-  height: 300%;
+  left: -8%;
+  top: -8%;
+  width: 116%;
+  height: 116%;
+  will-change: transform;
   transform: translate3d(var(--lx, 0px), 0, 0);
 }
 .light__dark--idle {
@@ -1217,9 +1300,9 @@ button {
   width: calc(var(--tw) * 2.4);
   height: calc(var(--th) * 2.2);
   transform: translate(-50%, -52%);
-  background: radial-gradient(ellipse at center, rgba(255,255,255,.55) 0%, rgba(255,255,255,.22) 28%, rgba(255,255,255,0) 62%);
-  mix-blend-mode: screen;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,.42) 0%, rgba(255,255,255,.16) 28%, rgba(255,255,255,0) 62%);
   animation: tv-glow 3.2s ease-in-out infinite;
+  will-change: opacity, transform;
   transition: opacity .8s ease;
   pointer-events: none;
 }
@@ -1463,7 +1546,7 @@ button {
   inset: 0;
   transform: translateZ(calc((1 - var(--a)) * -260px)) rotateY(var(--ry)) rotateX(5deg) rotateZ(var(--rz, 0deg));
   filter: drop-shadow(0 18px 22px rgba(0, 0, 0, .55)) drop-shadow(0 2px 2px rgba(0, 0, 0, .4));
-  animation: pcard-float 6s ease-in-out infinite;
+  will-change: transform;   /* своя прослойка: тень не перерисовывается, когда рядом шагает парад */
 }
 .pcard-wrap--l .pcard { --ry: 22deg; }
 .pcard-wrap--r .pcard { --ry: -22deg; animation-delay: -3s; }
@@ -1646,8 +1729,8 @@ button {
   flex: 1;
   height: 100%;
   perspective: 900px;
-  font-family: "Oswald", "Old Standard TT", sans-serif;
-  font-weight: 600;
+  font-family: var(--font);
+  font-weight: 400;
   color: #f4f4f4;
 }
 .flip__half, .flip__flap {
@@ -1959,7 +2042,7 @@ button {
 }
 
 /* ===================== IV. МАМА...: кольца письма и горящие конверты ===================== */
-.chapter--mama { height: 380vh; padding: 0; background: #000; }
+.chapter--mama { height: 620vh; padding: 0; background: #000; }
 .mama-scene {
   position: sticky;
   top: var(--header-h);
@@ -1976,11 +2059,55 @@ button {
   width: 100%;
   height: 100%;
 }
+/* кольца прочитанных строк: нарисованы один раз, вращает их CSS */
+.mama-rings { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.mama-ring {
+  position: absolute;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+  animation: mama-spin 300s linear infinite;
+  will-change: transform;
+}
+.mama-ring.is-on { opacity: .3; }
+.mama-rings.is-paused .mama-ring { animation-play-state: paused; }
+@keyframes mama-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mama-ring { animation: none; } }
+/* одна строка письма — крупно и неподвижно; меняется только прозрачностью */
+.mama-line {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: var(--my, 55%);
+  width: var(--mw, min(620px, 80vw));
+  margin: 0;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #fff;
+  font-family: var(--font);
+  font-size: clamp(22px, 2.6vw, 38px);
+  line-height: 1.32;
+  text-wrap: balance;
+  opacity: 0;
+  filter: blur(6px);
+  transition: opacity .9s ease, filter .9s ease;
+  text-shadow: 0 0 18px #000, 0 0 36px #000;
+  pointer-events: none;
+}
+.mama-line.is-on { opacity: 1; filter: blur(0); }
+.mama-line.is-last { font-style: italic; font-size: clamp(26px, 3.2vw, 48px); }
+@media (max-width: 640px) {
+  .mama-line { font-size: 22px; }
+  .mama-line.is-last { font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mama-line { transition: none; filter: none; }
+}
 
 /* ===================== V. ПОСЛЕДНЕЕ СЛОВО: текст в глубине ===================== */
-.chapter--last { padding: 0; background: #000; }
+.chapter--last { height: 760vh; padding: 0; background: #000; }
 .last-scene {
-  position: relative;
+  position: sticky;
+  top: var(--header-h);
   height: calc(100vh - var(--header-h));
   height: calc(100svh - var(--header-h));
   overflow: hidden;
@@ -2007,11 +2134,37 @@ button {
   line-height: 1.35;
   text-align: center;
   color: #fff;
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
+  filter: blur(1.4px);
   pointer-events: none;
 }
 .vx--deep { font-size: max(12px, calc(15 * var(--u))); width: min(26vw, 300px); }
+/* то, что он говорит сейчас: неподвижно, крупно, в центре; уже сказанное уходит в вихрь позади */
+.last-line {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  z-index: 2;
+  width: min(680px, calc(100vw - 48px));
+  margin: 0;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-family: var(--font);
+  font-size: clamp(20px, 2.1vw, 30px);
+  line-height: 1.42;
+  text-align: center;
+  text-wrap: pretty;
+  text-shadow: 0 0 16px #000, 0 0 32px #000, 0 0 48px #000;
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 1s ease, filter 1s ease;
+  pointer-events: none;
+}
+.last-line.is-on { opacity: 1; filter: blur(0); }
+.last-line.is-final { font-style: italic; font-size: clamp(24px, 2.8vw, 40px); }
+@media (prefers-reduced-motion: reduce) { .last-line { transition: none; filter: none; } }
 @media (max-width: 760px) {
+  .last-line { font-size: 19px; top: 52%; }
   .vx { width: min(72vw, 320px); font-size: 15px; }
   .vx--deep { width: 50vw; font-size: 12px; }
 }
@@ -2027,6 +2180,7 @@ button {
   color: #fff;
   font-size: max(17px, calc(24 * var(--u)));
   letter-spacing: .02em;
+  white-space: nowrap;
   transform: translate(-50%, 16px);
   opacity: 0;
   transition: opacity 1.2s ease, transform 1.2s cubic-bezier(.2, .7, .2, 1), background .2s ease;
@@ -2071,25 +2225,56 @@ button {
 .question__answers { display: flex; gap: 28px; justify-content: center; }
 .question.is-ask .question__yes { opacity: 1; }
 .question__yes:hover, .question__yes:focus-visible { background: #fff; color: #000; outline: none; }
-.question__thanks {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  margin: 0;
-  transform: translate(-50%, -50%);
-  width: min(90vw, 760px);
-  font-size: max(30px, calc(60 * var(--u)));
-  line-height: 1.1;
-  opacity: 0;
-  transition: opacity 1.4s ease;
-}
-.question.is-thanks .question__text, .question.is-thanks .question__answers { opacity: 0; transition: opacity .8s ease; pointer-events: none; }
-.question.is-thanks .question__thanks { opacity: 1; }
+
 .question.is-fading { background-color: rgba(0, 0, 0, 0); pointer-events: none; }
-.question.is-fading .question__thanks { opacity: 0; transition-delay: 1.6s; }
+
+/* --- ответ: возвращается телефон из главы «Я ТЕБЯ НЕ ЛЮБЛЮ» --- */
+.verdict {
+  --ph: min(70svh, 600px);
+  --pw: calc(var(--ph) * .46);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 520px);
+  align-items: center;
+  justify-content: center;
+  gap: clamp(32px, 6vw, 96px);
+  padding: 24px;
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.6s ease, visibility 0s 1.6s;
+  perspective: 1400px;
+}
+.question.is-verdict .verdict { opacity: 1; visibility: visible; transition: opacity 1.6s ease; }
+.question.is-verdict .question__text, .question.is-verdict .question__answers { opacity: 0; transition: opacity .8s ease; pointer-events: none; }
+.verdict__phone { position: relative; }
+.verdict__phone .phone { --prx: 6deg; --pry: 14deg; }
+.verdict__phone .phone__screen { --glow: .7; }
+.verdict__words { display: grid; gap: .9em; }
+.verdict__words p {
+  margin: 0;
+  font-size: clamp(19px, 1.9vw, 28px);
+  line-height: 1.35;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 1.4s ease, transform 1.4s ease;
+}
+.verdict__words p.is-big { font-size: clamp(26px, 2.9vw, 44px); line-height: 1.15; }
+.verdict__words p.is-on { opacity: 1; transform: none; }
+.sms__status { display: block; font-size: .72em; opacity: .7; }
+/* сначала гаснет телефон и слова, потом сквозь чёрное видно, как исчезает лонгрид */
+.question.is-fading { transition: opacity 1.2s ease, background-color 1.4s ease 1.3s; }
+.question.is-fading .verdict { opacity: 0; transition: opacity 1.2s ease; }
+@media (max-width: 760px) {
+  .verdict { --ph: min(42svh, 330px); grid-template-columns: 1fr; justify-items: center; align-content: center; gap: 28px; text-align: center; }
+  .verdict__words p { font-size: 18px; }
+  .verdict__words p.is-big { font-size: 24px; }
+}
 
 /* --- лонгрид исчезает --- */
 html.is-vanishing .header,
+html.is-vanishing .entry,
 html.is-vanishing .hero,
 html.is-vanishing .story,
 html.is-vanishing .chapters {
@@ -2101,7 +2286,7 @@ html.is-vanishing .chapters {
   35%  { opacity: .85; filter: blur(2px) brightness(1.4); }
   100% { opacity: 0; filter: blur(18px) brightness(2); transform: scale(.94); }
 }
-html.is-gone .header, html.is-gone .hero, html.is-gone .story, html.is-gone .chapters { display: none; }
+html.is-gone .header, html.is-gone .entry, html.is-gone .hero, html.is-gone .story, html.is-gone .chapters { display: none; }
 html.is-gone body { background: #000; }
 
 /* --- источники --- */
@@ -2175,8 +2360,43 @@ html.is-gone .credits { animation: sources-in 2.4s ease .6s both; }
 html.is-gone .sources { animation: sources-in 2.4s ease both; }
 @keyframes sources-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
+/* ===================== Титры на первом экране ===================== */
+.titles {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 24px;
+  background: #000;
+  color: #fff;
+  text-align: center;
+  transition: opacity 1.1s ease, visibility 0s 1.1s;
+}
+.titles[hidden] { display: none; }
+.titles.is-gone { opacity: 0; visibility: hidden; }
+.titles > * { opacity: 0; animation: titles-in 1.2s ease forwards; }
+.titles__kicker { font-size: max(13px, calc(18 * var(--u))); letter-spacing: .3em; text-transform: uppercase; animation-delay: .2s; }
+.titles__name { margin: .35em 0 0; font-size: clamp(40px, 6.2vw, 108px); line-height: 1; font-weight: 400; animation-delay: .5s; }
+.titles__about { margin-top: 1.4em; font-size: max(15px, calc(22 * var(--u))); line-height: 1.4; max-width: 34em; animation-delay: 1.1s; }
+.titles__people { display: flex; flex-wrap: wrap; justify-content: center; gap: .4em 2.4em; margin-top: 3.2em; font-size: max(15px, calc(22 * var(--u))); animation-delay: 1.6s; }
+.titles__people span { position: relative; z-index: 0; }
+.titles__people span::before { content: ""; position: absolute; left: -.25em; right: -.35em; top: 52%; bottom: -.08em; background: var(--red); z-index: -1; }
+.titles__hint { position: absolute; bottom: 7vh; left: 0; right: 0; font-size: max(13px, calc(16 * var(--u))); letter-spacing: .08em; opacity: 0; animation: titles-hint 1.2s ease 2s forwards; }
+@keyframes titles-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes titles-hint { to { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) {
+  .titles > *, .titles__hint { animation-duration: .01s; animation-delay: 0s; }
+}
+
 /* ===================== Липкая шапка и текущая глава ===================== */
-.header { position: sticky; top: 0; }
+.header { position: sticky; top: 0; transition: opacity .7s ease, transform .7s cubic-bezier(.2, .7, .2, 1); }
+/* на вступлении шапки нет — только голос */
+.header.is-intro { opacity: 0; transform: translateY(-100%); pointer-events: none; }
+.header.is-intro * { visibility: hidden; transition: visibility 0s .7s; }
 .nav a.is-current { color: var(--red); }
 
 /* ===================== Узкие экраны для глав ===================== */
@@ -2208,35 +2428,38 @@ html.is-gone .sources { animation: sources-in 2.4s ease both; }
 /* у обёртки нет своего слоя — иначе режим наложения смешивал бы зерно само с собой */
 .film { position: static; pointer-events: none; }
 .film > * { position: fixed; z-index: 300; pointer-events: none; }
+/* зерно — маленькая готовая текстура, слой только сдвигается (это делает видеокарта, страница не перерисовывается) */
 .film__grain, .film__specks {
-  left: -50%;
-  top: -50%;
-  width: 200%;
-  height: 200%;
+  left: -64px;
+  top: -64px;
+  right: -64px;
+  bottom: -64px;
   will-change: transform;
+  backface-visibility: hidden;
 }
 .film__grain {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-  background-size: 240px 240px;
-  mix-blend-mode: overlay;
-  opacity: .5;
-  animation: film-grain .6s steps(6) infinite;
+  background: url("assets/grain.png") repeat;
+  background-size: 256px 256px;
+  opacity: .55;
+  animation: film-grain 1s steps(1) infinite;
 }
 /* светлое зерно видно и на чёрном */
 .film__specks {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3 0 0 0 -1.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E");
-  background-size: 300px 300px;
-  opacity: .06;
-  animation: film-grain .8s steps(5) infinite reverse;
+  background: url("assets/specks.png") repeat;
+  background-size: 320px 320px;
+  opacity: .22;
+  animation: film-grain 1.4s steps(1) infinite reverse;
 }
+/* пока страницу прокручивают, зерно замирает — прокрутке достаётся вся мощность */
+.film.is-scrolling > * { animation-play-state: paused; }
 @keyframes film-grain {
-  0%   { transform: translate(0, 0); }
-  17%  { transform: translate(-6%, 4%); }
-  33%  { transform: translate(5%, -7%); }
-  50%  { transform: translate(-3%, -4%); }
-  67%  { transform: translate(7%, 6%); }
-  83%  { transform: translate(-8%, 2%); }
-  100% { transform: translate(0, 0); }
+  0%   { transform: translate3d(0, 0, 0); }
+  17%  { transform: translate3d(-37px, 23px, 0); }
+  33%  { transform: translate3d(29px, -41px, 0); }
+  50%  { transform: translate3d(-17px, -26px, 0); }
+  67%  { transform: translate3d(43px, 35px, 0); }
+  83%  { transform: translate3d(-49px, 11px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 .film__vignette {
   inset: 0;
@@ -2308,7 +2531,7 @@ html.is-gone .sources { animation: sources-in 2.4s ease both; }
   .ray { transition: opacity .3s ease; }
   .caret::after, .story__hint span { animation: none; }
   [data-reveal] { transition: none; opacity: 1; transform: none; }
-  .marcher *, .tv, .tv-screen__track, .tv-glow, .pcard, .flash, .sms, .sms-caret, .credits__track { animation: none !important; }
+  .entry__line, .entry__ask, .entry__note, .entry__figure, .marcher *, .tv, .tv-screen__track, .tv-glow, .pcard, .flash, .sms, .sms-caret, .credits__track { animation: none !important; }
   .tv-screen__content { transform: none; filter: none; }
   html.is-vanishing .header, html.is-vanishing .hero, html.is-vanishing .story, html.is-vanishing .chapters { animation-duration: .01s; }
 }

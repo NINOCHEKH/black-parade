@@ -153,6 +153,13 @@ function fitActiveScales() {
 window.addEventListener("resize", fitActiveScales);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitActiveScales);
 
+// круг плывёт, только когда экран альбома виден
+let heroVisible = true;
+const heroEl = document.querySelector(".hero");
+if (heroEl && "IntersectionObserver" in window) {
+  new IntersectionObserver((es) => { heroVisible = es[0].isIntersecting; }).observe(heroEl);
+}
+
 let lastTime = performance.now();
 function frame(now) {
   const dt = Math.min(0.1, (now - lastTime) / 1000);
@@ -163,7 +170,7 @@ function frame(now) {
     rotation = tween.from + tween.delta * easeInOutCubic(t);
     if (t >= 1) tween = null;
     applyRotation();
-  } else if (!reduceMotion && !hovering && engine.paused) {
+  } else if (!reduceMotion && !hovering && engine.paused && heroVisible) {
     // Круг медленно плывёт, пока музыка не играет
     rotation -= DRIFT_SPEED * dt;
     applyRotation();
@@ -202,7 +209,7 @@ function getTrack(src) {
   el.addEventListener("ended", () => { if (el === audio) setPlaying(false); });
   el.addEventListener("error", () => {
     if (el === audio) setPlaying(false);
-    console.warn("Файл не найден или не читается:", src);
+    console.warn("Файл не найден или не читается:", src);
   });
   tracks.set(src, el);
   return el;
@@ -243,7 +250,7 @@ const engine = {
   async play() {
     if (this.mode === "html") {
       try { await audio.play(); }
-      catch (err) { console.warn("Не удалось включить трек:", err); setPlaying(false); }
+      catch (err) { console.warn("Не удалось включить трек:", err); setPlaying(false); }
       return;
     }
     if (this.mode !== "webaudio") return;
@@ -333,9 +340,14 @@ function setPlaying(isPlaying) {
   btnPlay.setAttribute("aria-pressed", String(isPlaying));
 }
 
+let lastProgress = "";
 function updateProgress() {
   const d = engine.duration;
-  progressFill.style.width = d ? Math.min(100, (engine.currentTime / d) * 100) + "%" : "0";
+  // полоска двигается через transform: так не нужно пересчитывать раскладку шапки каждый кадр
+  const v = d ? Math.min(1, engine.currentTime / d).toFixed(4) : "0";
+  if (v === lastProgress) return;
+  lastProgress = v;
+  progressFill.style.transform = `scaleX(${v})`;
 }
 
 function loadSong(s, { autoplay, changed }) {
@@ -346,7 +358,7 @@ function loadSong(s, { autoplay, changed }) {
     engine.load(null);
     setPlaying(false);
     btnPlay.disabled = true;
-    btnPlay.setAttribute("aria-label", "Трек ещё не добавлен");
+    btnPlay.setAttribute("aria-label", "Трек ещё не добавлен");
     player.classList.add("is-empty");
     return;
   }
@@ -551,6 +563,61 @@ window.addEventListener("keydown", (e) => {
   } else if (["ArrowUp", "PageUp", "Home"].includes(e.code)) {
     unlockStory();
   }
+});
+
+// на вступлении шапки (меню и плеера) ещё нет: она выезжает, когда вступление уходит с экрана
+const siteHeader = document.querySelector(".header");
+let introTick = false;
+function updateIntroHeader() {
+  introTick = false;
+  if (!siteHeader) return;
+  const r = story.getBoundingClientRect();
+  siteHeader.classList.toggle("is-intro", r.bottom > window.innerHeight * 0.55);
+}
+window.addEventListener("scroll", () => {
+  if (introTick) return;
+  introTick = true;
+  requestAnimationFrame(updateIntroHeader);
+}, { passive: true });
+window.addEventListener("resize", updateIntroHeader);
+updateIntroHeader();
+
+// вступление теперь первое: если страница открыта сверху, начинаем печатать сразу
+// титры держатся ~3,5 с и растворяются; прокрутка, клик или клавиша убирают их сразу
+const titles = document.getElementById("titles");
+let titlesOn = false, titlesTimer = 0;
+const atStart = () => !location.hash && window.scrollY <= storyTop() + 2;
+function startStoryLater() {
+  if (!storyDone && atStart()) setTimeout(lockStory, reduceMotion ? 0 : 700);
+}
+function hideTitles() {
+  if (!titlesOn) return;
+  titlesOn = false;
+  clearTimeout(titlesTimer);
+  titles.classList.add("is-gone");
+  setTimeout(() => { titles.hidden = true; }, 1200);
+  startStoryLater();
+}
+if (titles) {
+  if (atStart()) {
+    titlesOn = true;
+    titlesTimer = setTimeout(hideTitles, reduceMotion ? 1500 : 3600);
+    const skip = (e) => {
+      if (!titlesOn) return;
+      if (e.type === "wheel" && e.deltaY <= 0) return;
+      if (e.cancelable) e.preventDefault();
+      hideTitles();
+    };
+    window.addEventListener("wheel", skip, { passive: false });
+    window.addEventListener("touchmove", skip, { passive: false });
+    window.addEventListener("keydown", (e) => { if (titlesOn) { e.preventDefault(); hideTitles(); } });
+    titles.addEventListener("click", hideTitles);
+  } else {
+    titles.hidden = true;
+  }
+}
+window.addEventListener("load", () => {
+  if (!titlesOn && !(titles && titles.classList.contains("is-gone"))) startStoryLater();
 });
 
 // Показать вступление целиком (например, при переходе по меню к главам)

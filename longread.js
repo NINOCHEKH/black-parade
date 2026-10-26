@@ -1,3 +1,30 @@
+/* CSS-переменную пишем, только если значение действительно изменилось:
+   каждая запись заставляет браузер пересчитать стили всех вложенных элементов */
+/* Геометрию читаем один раз за кадр и до любых записей — иначе браузер
+   пересчитывает раскладку посреди кадра (это и давало рывки при прокрутке) */
+const __frameRects = new Map();
+let __inFrame = false;
+function rectOf(el) {
+  if (!__inFrame) return el.getBoundingClientRect();
+  let r = __frameRects.get(el);
+  if (!r) { r = el.getBoundingClientRect(); __frameRects.set(el, r); }
+  return r;
+}
+// sticky-отступ и высота сцены меняются только при изменении окна
+const __geo = new WeakMap();
+function sceneGeo(sceneEl) {
+  let g = __geo.get(sceneEl);
+  if (!g) { g = { top: parseFloat(getComputedStyle(sceneEl).top) || 0, h: sceneEl.offsetHeight }; __geo.set(sceneEl, g); }
+  return g;
+}
+window.addEventListener("resize", () => { document.querySelectorAll("[id$=Scene], .countdown-scene").forEach((el) => __geo.delete(el)); }, { capture: true });
+function setVar(el, k, v) {
+  if (!el) return;
+  const c = el.__vars || (el.__vars = {});
+  if (c[k] === v) return;
+  c[k] = v;
+  el.style.setProperty(k, v);
+}
 /* =========================================================
    Главы лонгрида: печать текста, проявление, шествие, песни, меню
    (работает вместе с script.js — берёт оттуда SONGS, selectSong, engine)
@@ -112,7 +139,10 @@
   // фазы скролла внутри главы (0…1, пока сцена закреплена)
   const PH = { dissolveFrom: 0.36, dissolveTo: 0.58, textAt: 0.55, redFrom: 0.78, redTo: 0.98 };
 
-  let deadQ = 0, dis = 0, sceneVisible = false;
+  let deadQ = 0, dis = 0, sceneVisible = false, appearV = 1;
+  const lightEls = scene ? Array.from(scene.querySelectorAll(".desk, .light")) : [];
+  let folderW = folder ? folder.offsetWidth : 0, folderH = folder ? folder.offsetHeight : 0;
+  window.addEventListener("resize", () => { if (folder) { folderW = folder.offsetWidth; folderH = folder.offsetHeight; } });
   let mode = "idle";                       // idle → opening → open → closing → idle
   const st = { ry: -20, rx: -6, ty: 0, open: 0, lift: 0, light: 0 };
   let animStart = 0, from = null, ryTarget = 0;
@@ -121,10 +151,10 @@
   const t0 = performance.now();
 
   function sceneGeometry() {
-    const r = deadSec.getBoundingClientRect();
+    const r = rectOf(deadSec);
     const vh = window.innerHeight;
-    const hh = parseFloat(getComputedStyle(scene).top) || 0;
-    return { r, vh, hh, travel: Math.max(1, r.height - scene.offsetHeight) };
+    const g = sceneGeo(scene), hh = g.top;
+    return { r, vh, hh, travel: Math.max(1, r.height - g.h) };
   }
 
   function updateDead() {
@@ -133,10 +163,11 @@
     sceneVisible = r.bottom > 0 && r.top < vh;
     if (!sceneVisible) return;
     const appear = clamp01((vh - r.top) / Math.max(1, vh - hh));
-    scene.style.setProperty("--appear", (reduce ? 1 : 1 - Math.pow(1 - appear, 3)).toFixed(3));
+    appearV = reduce ? 1 : 1 - Math.pow(1 - appear, 3);
+    setVar(scene, "--appear", appearV.toFixed(3));
     deadQ = clamp01((hh - r.top) / travel);
     remains.classList.toggle("is-shown", deadQ > PH.textAt);
-    scene.style.setProperty("--red", smooth(PH.redFrom, PH.redTo, deadQ).toFixed(3));   // плавно наплывает красный
+    setVar(scene, "--red", smooth(PH.redFrom, PH.redTo, deadQ).toFixed(3));   // плавно наплывает красный
   }
 
   /* --- открыть / закрыть папку --- */
@@ -146,14 +177,14 @@
     animStart = performance.now();
     from = { ...st };
     ryTarget = Math.round(st.ry / 360) * 360;              // повернуться лицом кратчайшим путём
-    folder.setAttribute("aria-label", "Личное дело пациента № 7 — закрыть");
+    folder.setAttribute("aria-label", "Личное дело пациента № 7 — закрыть");
   }
   function closeFolder() {
     if (mode !== "open") return;
     mode = "closing";
     animStart = performance.now();
     folder.classList.remove("is-open");
-    folder.setAttribute("aria-label", "Личное дело пациента № 7 — открыть");
+    folder.setAttribute("aria-label", "Личное дело пациента № 7 — открыть");
   }
   function toggleFolder() { if (mode === "idle") openFolder(); else if (mode === "open") closeFolder(); }
 
@@ -169,7 +200,7 @@
 
   // общая «раскадровка»: k — секунды от начала раскрытия (при закрытии идём назад)
   function pose(k) {
-    const fh = folder.offsetHeight;
+    const fh = folderH;
     const pA = easeIO(clamp01(k / 0.9));                  // повернуться лицом
     const pB = easeIO(clamp01((k - 0.6) / 1.0));          // лечь на стол
     const pC = easeIO(clamp01((k - 1.5) / 1.0));          // раскрыться
@@ -206,22 +237,24 @@
     const lightOn = st.light * (1 - dis);
     const c = Math.cos(st.ry * Math.PI / 180);
     const amb = 1 - 0.65 * lightOn;
-    scene.style.setProperty("--ry", st.ry.toFixed(2) + "deg");
-    scene.style.setProperty("--rx", st.rx.toFixed(2) + "deg");
-    scene.style.setProperty("--ty", st.ty.toFixed(1) + "px");
-    scene.style.setProperty("--open", st.open.toFixed(4));
-    scene.style.setProperty("--lift", st.lift.toFixed(1) + "px");
-    scene.style.setProperty("--light", lightOn.toFixed(3));
-    scene.style.setProperty("--dimF", ((0.12 + 0.55 * (1 - Math.max(0, c))) * amb).toFixed(3));
-    scene.style.setProperty("--dimB", ((0.12 + 0.55 * (1 - Math.max(0, -c))) * amb).toFixed(3));
-    scene.style.setProperty("--dimIn", (0.25 * amb).toFixed(3));
+    // вращение папки — сразу transform, без CSS-переменных на всей сцене
+    folder.style.transform = `translateY(${st.ty.toFixed(1)}px) translateX(${((1 - st.open) * folderW * -0.25).toFixed(1)}px) rotateX(${st.rx.toFixed(2)}deg) rotateY(${st.ry.toFixed(2)}deg) scale(${(0.85 + 0.15 * appearV).toFixed(3)})`;
+    setVar(scene, "--open", st.open.toFixed(3));
+    setVar(scene, "--lift", st.lift.toFixed(1) + "px");
+    // затенение граней меняется плавно — пишем грубо, чтобы не пересчитывать стили каждый кадр
+    setVar(folder, "--dimF", ((0.12 + 0.55 * (1 - Math.max(0, c))) * amb).toFixed(2));
+    setVar(folder, "--dimB", ((0.12 + 0.55 * (1 - Math.max(0, -c))) * amb).toFixed(2));
+    setVar(folder, "--dimIn", (0.25 * amb).toFixed(2));
 
     // свет покачивается, как лампочка на шнуре, и иногда мигает
-    const fw = folder.offsetWidth / 2;
+    const fw = folderW / 2;
     lightX = reduce ? 0 : fw * 0.07 * Math.sin(t * 1.25) + fw * 0.015 * Math.sin(t * 2.9);
     lightI = reduce ? 1 : flickerLevel(now);
-    scene.style.setProperty("--lx", lightX.toFixed(1) + "px");
-    scene.style.setProperty("--li", lightI.toFixed(3));
+    for (const el of lightEls) {
+      setVar(el, "--light", lightOn.toFixed(3));
+      setVar(el, "--lx", lightX.toFixed(1) + "px");
+      setVar(el, "--li", lightI.toFixed(2));
+    }
   }
 
   let lightX = 0, lightI = 1, nextFlicker = performance.now() + 5000, flickerEnd = 0, flickerStep = 0, flickerVal = 1;
@@ -342,7 +375,7 @@
 
   function setDissolve(v) {
     dis = v;
-    scene.style.setProperty("--dis", v.toFixed(3));
+    setVar(scene, "--dis", v.toFixed(3));
     stage.classList.toggle("is-dissolving", v > 0.001);
     // порог по шуму: 0 — всё на месте, 1 — ничего не осталось
     const T = lerp(0.18, 0.86, v);
@@ -498,6 +531,13 @@
 
   window.marcherSVG = marcherSVG;   // те же фигурки идут в подвале (finale.js)
 
+  // вход: одна целая фигура, марширует на месте
+  const entryFigure = document.getElementById("entryFigure");
+  if (entryFigure) {
+    entryFigure.innerHTML = marcherSVG("drum");
+    entryFigure.querySelectorAll(".leg-a, .leg-b, .body").forEach((g) => { g.style.animationDuration = g.classList.contains("body") ? "0.7s" : "1.4s"; });
+  }
+
   if (track) {
     // два одинаковых ряда подряд — лента бесконечно едет по экрану
     const kinds = ["flag", "drum", "horn", "drum", "horn", "drum", "horn", "drum"];
@@ -548,16 +588,16 @@
   pCards.forEach((wrap, i) => {
     const rnd = seeded(97 + i * 131);
     const paper = wrap.querySelector(".pcard");
-    paper.style.setProperty("--clip", tornClip(rnd));
-    paper.style.setProperty("--fold", (95 + rnd() * 40).toFixed(0) + "deg");
-    paper.style.setProperty("--rz", ((rnd() - 0.5) * 5).toFixed(1) + "deg");
+    setVar(paper, "--clip", tornClip(rnd));
+    setVar(paper, "--fold", (95 + rnd() * 40).toFixed(0) + "deg");
+    setVar(paper, "--rz", ((rnd() - 0.5) * 5).toFixed(1) + "deg");
     ["s1", "s2", "s3"].forEach((k) => {
-      paper.style.setProperty(`--${k}x`, (10 + rnd() * 80).toFixed(0) + "%");
-      paper.style.setProperty(`--${k}y`, (10 + rnd() * 80).toFixed(0) + "%");
+      setVar(paper, `--${k}x`, (10 + rnd() * 80).toFixed(0) + "%");
+      setVar(paper, `--${k}y`, (10 + rnd() * 80).toFixed(0) + "%");
     });
-    paper.style.setProperty("--tape", rnd() < 0.6 ? "1" : "0");
-    paper.style.setProperty("--tape-x", (20 + rnd() * 45).toFixed(0) + "%");
-    paper.style.setProperty("--tape-r", ((rnd() - 0.5) * 12).toFixed(1) + "deg");
+    setVar(paper, "--tape", rnd() < 0.6 ? "1" : "0");
+    setVar(paper, "--tape-x", (20 + rnd() * 45).toFixed(0) + "%");
+    setVar(paper, "--tape-r", ((rnd() - 0.5) * 12).toFixed(1) + "deg");
   });
 
   // свой фильтр «рассыпания» у каждой карточки
@@ -617,13 +657,13 @@
   let pVisible = false;
   function updateParadeScene() {
     if (!paradeSec || !pScene) return;
-    const r = paradeSec.getBoundingClientRect();
+    const r = rectOf(paradeSec);
     const vh = window.innerHeight;
     pVisible = r.bottom > 0 && r.top < vh;
     if (!pVisible) return;
-    const hh = parseFloat(getComputedStyle(pScene).top) || 0;
-    const q = clamp01((hh - r.top) / Math.max(1, r.height - pScene.offsetHeight));
-    pScene.style.setProperty("--dim", smooth(0.04, 0.96, q).toFixed(3));   // красный тускнеет
+    const hh = sceneGeo(pScene).top;
+    const q = clamp01((hh - r.top) / Math.max(1, r.height - sceneGeo(pScene).h));
+    setVar(pScene, "--dim", smooth(0.04, 0.96, q).toFixed(3));   // красный тускнеет
     setTv(q < 0.95);                                                        // текст закончился — телевизор гаснет
 
     pCards.forEach((wrap) => {
@@ -632,7 +672,7 @@
       const d = reduce ? (q >= t.out0 ? 1 : 0) : smooth(t.out0, t.out1, q);
       const active = a > 0.001 && d < 0.999;
       wrap.classList.toggle("is-active", active);
-      wrap.style.setProperty("--a", a.toFixed(3));
+      setVar(wrap, "--a", a.toFixed(3));
       if (d > wrap._dis && pCanvas && active) emitCardShards(wrap, (d - wrap._dis) * 900);
       wrap._dis = d;
       if (d > 0.001) {
@@ -694,13 +734,13 @@
   const nctx = cNoise && cNoise.getContext("2d");
   // признания вспыхивают вокруг — ступенями, от тихих к невыносимым
   const CONFESSIONS = [
-    ["я не перезвонил", "я сказал «потом»", "я опять опоздал", "я забыл её день рождения"],
-    ["я врал тем, кто меня любил", "я хлопал дверью", "я делал вид, что мне всё равно", "я ни разу не сказал спасибо"],
-    ["я не был хорошим сыном", "я делал больно нарочно", "меня не за что вспомнить", "я никого не удержал"],
-    ["поздно", "никто не придёт", "прости", "уже ничего не исправить"],
+    ["я не перезвонил", "я сказал «потом»", "я опять опоздал", "я забыл её день рождения"],
+    ["я врал тем, кто меня любил", "я делал вид, что мне всё равно", "я ни разу не сказал спасибо"],
+    ["я не был хорошим сыном", "я делал больно нарочно", "меня не за что вспомнить", "я никого не удержал"],
+    ["поздно", "никто не придёт", "прости", "уже ничего не исправить"],
   ];
   // сколько секунд держится каждая цифра: медленно, чтобы полотно успевало проступать; к концу быстрее
-  const COUNT_STEP = { 10: 4.2, 9: 4.0, 8: 3.8, 7: 3.6, 6: 3.4, 5: 3.2, 4: 3.0, 3: 2.8, 2: 2.6, 1: 2.4, 0: 1.0 };
+  const COUNT_STEP = { 10: 2.6, 9: 2.4, 8: 2.2, 7: 2.1, 6: 2.0, 5: 1.9, 4: 1.8, 3: 1.7, 2: 1.6, 1: 1.5, 0: 0.8 };   // ≈ 20 с
   let cVisible = false, cNoiseLevel = 0, cWhite = false, nextFlashAt = 0, noiseImg = null;
   let cState = "wait";            // wait → run → done
   let cNum0 = 10, cStepEnd = 0, cProgress = 0, cLockY = 0, cLastY = window.scrollY;
@@ -789,11 +829,11 @@
     cScene.classList.remove("is-white", "is-done");
     cNum.textContent = "10"; cFlashes.innerHTML = "";
     lightWall(0);
-    clockStage.style.setProperty("--cg", "0");
+    setVar(clockStage, "--cg", "0");
     setClock(10, false);
     clockArriving = false; clockArrive = 0;
-    clockStage.style.setProperty("--ca", "0");
-    cNoiseLevel = 0; cScene.style.setProperty("--noise", "0");
+    setVar(clockStage, "--ca", "0");
+    cNoiseLevel = 0; setVar(cScene, "--noise", "0");
   }
 
   function startCountdown() {
@@ -817,11 +857,11 @@
     cNum.textContent = "0";
     setClock(0, false);
     clockArriving = false; clockArrive = 1;
-    clockStage.style.setProperty("--ca", "1");
+    setVar(clockStage, "--ca", "1");
     cScene.classList.add("is-white", "is-done");
-    clockStage.style.setProperty("--cg", "1");
+    setVar(clockStage, "--cg", "1");
     lightWall(1);
-    cScene.style.setProperty("--noise", "0");
+    setVar(cScene, "--noise", "0");
     cFlashes.innerHTML = "";
   }
   window.finishCountdown = () => { if (cState !== "done") finishCountdown(); };
@@ -839,20 +879,20 @@
     const inStep = Math.max(0, COUNT_STEP[cNum0] - Math.max(0, (cStepEnd - now) / 1000));
     cProgress = clamp01((cElapsedBefore + inStep) / COUNT_TOTAL);
     cNoiseLevel = Math.pow(cProgress, 1.6);
-    cScene.style.setProperty("--noise", cNoiseLevel.toFixed(3));
+    setVar(cScene, "--noise", cNoiseLevel.toFixed(3));
     // часы растут весь отсчёт, а не сразу
-    clockStage.style.setProperty("--cg", (reduce ? 1 : 1 - Math.pow(1 - cProgress, 1.6)).toFixed(4));
+    setVar(clockStage, "--cg", (reduce ? 1 : 1 - Math.pow(1 - cProgress, 1.6)).toFixed(4));
     lightWall(cProgress);
   }
 
   // пока идёт отсчёт, страница стоит; прокрутка вверх отпускает и сбрасывает отсчёт
   function updateCountdown() {
     if (!countSec || !cScene) return;
-    const r = countSec.getBoundingClientRect();
+    const r = rectOf(countSec);
     const vh = window.innerHeight;
     const y = window.scrollY;
     cVisible = r.bottom > 0 && r.top < vh;
-    const hh = parseFloat(getComputedStyle(cScene).top) || 0;
+    const hh = sceneGeo(cScene).top;
     if (cState === "wait" && y > cLastY && r.top <= hh + 1 && r.top > hh - vh * 0.6) startCountdown();
     else if (cState === "run" && y > cLockY + 1) window.scrollTo(0, cLockY);
     else if (cState === "run" && y < cLockY - 2) resetCountdown();
@@ -894,7 +934,7 @@
     const want = 13 + Math.random() * (8 + 12 * cNoiseLevel);
     const fit = (cFlashes.clientWidth * 0.9) / (el.textContent.length * 0.52);
     el.style.fontSize = Math.min(want, fit).toFixed(1) + "px";
-    el.style.setProperty("--life", (0.7 + Math.random() * 0.9).toFixed(2) + "s");
+    setVar(el, "--life", (0.7 + Math.random() * 0.9).toFixed(2) + "s");
     el.addEventListener("animationend", () => el.remove());
     cFlashes.appendChild(el);
     const maxLeft = cFlashes.clientWidth - el.offsetWidth - 8;
@@ -905,9 +945,9 @@
     tickCountdown(now);
     if (clockArriving) {
       // свет проступает медленно, из ниоткуда
-      clockArrive = reduce ? 1 : clamp01((now - clockArriveStart) / 4500);
+      clockArrive = reduce ? 1 : clamp01((now - clockArriveStart) / 2800);
       const e = clockArrive * clockArrive * (3 - 2 * clockArrive);
-      clockStage.style.setProperty("--ca", e.toFixed(4));
+      setVar(clockStage, "--ca", e.toFixed(4));
       if (clockArrive >= 1) clockArriving = false;
     }
     if (!cVisible || cWhite || cState !== "run") return;
@@ -922,11 +962,11 @@
     }
     // ближе к нулю часы дёргаются
     const g = reduce ? 0 : Math.max(0, cNoiseLevel - 0.35) * 1.6;
-    clockStage.style.setProperty("--shx", ((Math.random() - 0.5) * g * 16).toFixed(1));
-    clockStage.style.setProperty("--shy", ((Math.random() - 0.5) * g * 8).toFixed(1));
+    setVar(clockStage, "--shx", ((Math.random() - 0.5) * g * 16).toFixed(1));
+    setVar(clockStage, "--shy", ((Math.random() - 0.5) * g * 8).toFixed(1));
     if (!reduce && now > nextFlashAt && cNoiseLevel > 0.03) {
       spawnFlash();
-      nextFlashAt = now + (2200 - 1700 * cNoiseLevel) * (0.5 + Math.random());
+      nextFlashAt = now + (1500 - 1100 * cNoiseLevel) * (0.5 + Math.random());
     }
   }
 
@@ -959,19 +999,19 @@
   // шкала главы (0…1): 0–0.08 телефон уходит вправо и растёт; 0.03–0.47 текст слева;
   // 0.46–0.56 телефон переезжает влево; 0.52–0.9 текст справа; 0.86 батарея мигает; 0.93 телефон гаснет
   const SMS = [
-    { at: 0.06, who: "her", meta: "Она · 21:40", text: "ты спишь?" },
-    { at: 0.12, who: "her", meta: "Она · 21:41", text: "я приду во вторник. принесу апельсины" },
+    { at: 0.06, who: "her", meta: "Она · 21:40", text: "ты спишь?" },
+    { at: 0.12, who: "her", meta: "Она · 21:41", text: "я приду во вторник. принесу апельсины" },
     { at: 0.18, who: "her", meta: "Она · 21:44", text: "врач сказал, тебе лучше. это правда?" },
     { at: 0.42, who: "her", meta: "Она · 22:30", text: "?" },
-    { at: 0.47, who: "her", meta: "Она · 23:05", text: "ты тут?" },
-    { at: 0.72, who: "me",  meta: "Я · 23:52 · доставлено", text: "не приходи больше. я тебя не люблю" },
+    { at: 0.47, who: "her", meta: "Она · 23:05", text: "ты тут?" },
+    { at: 0.72, who: "me",  meta: "Я · 23:52 · доставлено", text: "не приходи больше. я тебя не люблю" },
     { at: 0.79, who: "her", meta: "Она · 23:58", text: "это неправда" },
-    { at: 0.85, who: "her", meta: "Она · 00:03", text: "я всё равно приду во вторник" },
+    { at: 0.85, who: "her", meta: "Она · 00:03", text: "я всё равно приду во вторник" },
   ];
   const DRAFTS = [
     { from: 0.22, to: 0.27, hold: 0.29, erase: 0.31, text: "да, всё хорошо" },
     { from: 0.33, to: 0.36, hold: 0.38, erase: 0.40, text: "мне страшно" },
-    { from: 0.56, to: 0.69, hold: 0.72, erase: 0.72, text: "не приходи больше. я тебя не люблю", send: true },
+    { from: 0.56, to: 0.69, hold: 0.72, erase: 0.72, text: "не приходи больше. я тебя не люблю", send: true },
   ];
   let smsShown = -1, lastDraft = "";
 
@@ -998,16 +1038,16 @@
     const view = col.clientHeight;
     const start = view * 0.95;
     const end = endAt === undefined ? -inner.offsetHeight : view * endAt - inner.offsetHeight;
-    inner.style.setProperty("--y", lerp(start, end, p).toFixed(1) + "px");
+    setVar(inner, "--y", lerp(start, end, p).toFixed(1) + "px");
   }
 
   function updateLove() {
     if (!loveSec || !loveScene) return;
-    const r = loveSec.getBoundingClientRect();
+    const r = rectOf(loveSec);
     const vh = window.innerHeight;
     if (r.bottom < 0 || r.top > vh) return;
-    const hh = parseFloat(getComputedStyle(loveScene).top) || 0;
-    const q = clamp01((hh - r.top) / Math.max(1, r.height - loveScene.offsetHeight));
+    const hh = sceneGeo(loveScene).top;
+    const q = clamp01((hh - r.top) / Math.max(1, r.height - sceneGeo(loveScene).h));
     const narrow = narrowMQ.matches;
 
     // переписка: перестраиваем, только когда меняется число сообщений (скролл назад тоже работает)
@@ -1050,18 +1090,18 @@
       const toRight = smooth(0, 0.08, q), toLeft = smooth(0.46, 0.56, q);
       const x = narrow ? 0 : side * (toRight - 2 * toLeft);
       const sc = narrow ? 1 : 1 + 0.14 * toRight;
-      phoneWrap.style.setProperty("--px", x.toFixed(1) + "px");
-      phoneWrap.style.setProperty("--ps", sc.toFixed(3));
+      setVar(phoneWrap, "--px", x.toFixed(1) + "px");
+      setVar(phoneWrap, "--ps", sc.toFixed(3));
       // поворачивается к тексту
       const turn = narrow ? 0 : (toRight - 2 * toLeft);
-      phone.style.setProperty("--pry", (-8 * turn + 4 * Math.sin(q * 6)).toFixed(1) + "deg");
-      phone.style.setProperty("--prx", (8 - 3 * q).toFixed(1) + "deg");
+      setVar(phone, "--pry", (-8 * turn + 4 * Math.sin(q * 6)).toFixed(1) + "deg");
+      setVar(phone, "--prx", (8 - 3 * q).toFixed(1) + "deg");
     }
 
     // батарея садится вместе с ним; экран тускнеет; в конце — гаснет
     const bat = clamp01(1 - q * 1.08);
-    smsBattery.style.setProperty("--bat", bat.toFixed(3));
-    phone.style.setProperty("--glow", clamp01(1 - smooth(0.6, 0.92, q) * 0.85).toFixed(3));
+    setVar(smsBattery, "--bat", bat.toFixed(3));
+    setVar(phone, "--glow", clamp01(1 - smooth(0.6, 0.92, q) * 0.85).toFixed(3));
     phone.classList.toggle("is-low", q > 0.84 && q < 0.93);
     phone.classList.toggle("is-off", q >= 0.93);
   }
@@ -1115,17 +1155,31 @@
   // выше первой главы — ничего не подсвечено
   const firstChapter = document.querySelector(".chapter");
   function clearNavAboveChapters() {
-    if (firstChapter && firstChapter.getBoundingClientRect().top > window.innerHeight * 0.5) {
+    if (firstChapter && rectOf(firstChapter).top > window.innerHeight * 0.5) {
       navLinks.forEach((a) => a.classList.remove("is-current"));
     }
   }
 
   /* ---------- Один общий цикл для скролла ---------- */
   let ticking = false;
+  const film = document.querySelector(".film");
+  let scrollIdle = 0;
   window.addEventListener("scroll", () => {
+    if (film) {
+      if (!scrollIdle) film.classList.add("is-scrolling");
+      clearTimeout(scrollIdle);
+      scrollIdle = setTimeout(() => { film.classList.remove("is-scrolling"); scrollIdle = 0; }, 200);
+    }
     if (ticking) return;
     ticking = true;
-    requestAnimationFrame(() => { updateDead(); updateParadeScene(); updateCountdown(); updateLove(); clearNavAboveChapters(); ticking = false; });
+    requestAnimationFrame(() => {
+      __frameRects.clear(); __inFrame = true;
+      // сначала все замеры, потом все записи
+      [deadSec, paradeSec, countSec, loveSec, firstChapter].forEach((el) => el && rectOf(el));
+      updateDead(); updateParadeScene(); updateCountdown(); updateLove(); clearNavAboveChapters();
+      __frameRects.clear(); __inFrame = false;
+      ticking = false;
+    });
   }, { passive: true });
 
   setInterval(updateChips, 250);
