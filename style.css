@@ -4,13 +4,12 @@
    1 px макета = var(--u). Так экран масштабируется под любую ширину.
    ========================================================= */
 
-/* Шрифт из макета. Положи файл в assets/fonts/ — иначе будет Old Standard TT */
+/* Шрифт из макета — файл лежит в assets/fonts/, поэтому грузится на любом устройстве */
 @font-face {
   font-family: "Broadsheet";
-  src: local("Broadsheet"), local("Broadsheet Regular"),
-       url("assets/fonts/Broadsheet.woff2") format("woff2"),
-       url("assets/fonts/Broadsheet.woff") format("woff");
-  font-display: swap;
+  src: url("assets/fonts/Broadsheet.woff") format("woff");
+  font-weight: 100 900;
+  font-display: block;
 }
 
 :root {

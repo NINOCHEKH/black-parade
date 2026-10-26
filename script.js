@@ -45,9 +45,8 @@ window.addEventListener("resize", () => {
 const __holds = new Set();
 window.holdScroll = function (key, on) {
   if (on) __holds.add(key); else __holds.delete(key);
-  const v = __holds.size ? "hidden" : "";
-  document.documentElement.style.overflow = v;
-  document.body.style.overflow = v;
+  // только у html: если спрятать прокрутку и у body, липкая шапка и сцены теряют опору
+  document.documentElement.style.overflow = __holds.size ? "hidden" : "";
 };
 
 /* ---------- Круг с песнями ---------- */

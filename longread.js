@@ -227,7 +227,7 @@ function setVar(el, k, v) {
     } else if (mode === "open") {
       pose(T_OPEN);
     } else if (mode === "closing") {
-      // назад по той же раскадровке, чуть быстрее; поворот не повторяем
+      // назад по той же раскадровке, чуть быстрее; поворот не повторяем
       from = { ry: ryTarget, rx: -6 + 3 * Math.sin(t * 0.5), ty: 0 };
       const k = reduce ? 0 : T_OPEN - el * 1.25;
       pose(Math.max(0, k));
@@ -529,7 +529,7 @@ function setVar(el, k, v) {
     </svg>`;
   }
 
-  window.marcherSVG = marcherSVG;   // те же фигурки идут в подвале (finale.js)
+  window.marcherSVG = marcherSVG;   // те же фигурки идут в подвале (finale.js)
 
   // вход: одна целая фигура, марширует на месте
   const entryFigure = document.getElementById("entryFigure");
@@ -966,7 +966,7 @@ function setVar(el, k, v) {
         d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255;
       }
       nctx.putImageData(noiseImg, 0, 0);
-      if (noctx) noctx.drawImage(cNoise, 0, 0);          // те же помехи поверх часов, только слабее
+      if (noctx) noctx.drawImage(cNoise, 0, 0);          // те же помехи поверх часов, только слабее
     }
     // ближе к нулю часы дёргаются
     const g = reduce ? 0 : Math.max(0, cNoiseLevel - 0.35) * 1.6;
