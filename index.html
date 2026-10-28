@@ -606,12 +606,12 @@
   <section class="sources" id="sources" aria-labelledby="t-sources">
     <h2 class="sources__title" id="t-sources">Источники</h2>
     <ul class="sources__list">
-      <li>My Chemical Romance. <i>The Black Parade</i>. — Reprise Records, 2006. <a href="https://en.wikipedia.org/wiki/The_Black_Parade" target="_blank" rel="noopener">Об альбоме — Википедия</a></li>
-      <li>Фрагменты песен альбома: Dead!, This Is How I Disappear, The Sharpest Lives, Welcome to the Black Parade, I Don’t Love You, Cancer, Disenchanted, Famous Last Words, The End. Права принадлежат правообладателям.</li>
-      <li>Официальный сайт группы — <a href="https://www.mychemicalromance.com" target="_blank" rel="noopener">mychemicalromance.com</a></li>
-      <li>Шрифты Broadsheet (из макета), Old Standard TT, Caveat и PT Mono — <a href="https://fonts.google.com" target="_blank" rel="noopener">Google Fonts</a></li>
+      <li>My Chemical Romance. The Black Parade. — Reprise Records, 2006. <a href="https://en.wikipedia.org/wiki/The_Black_Parade" target="_blank" rel="noopener">Об альбоме — Википедия</a></li>
+      <li>Фрагменты песен альбома: Dead!, This Is How I Disappear, The Sharpest Lives, Welcome to the Black Parade, I Don’t Love You, Cancer, Disenchanted, Famous Last Words, The End. Права принадлежат правообладателям.</li>
+      <li>Официальный сайт группы — <a href="https://www.mychemicalromance.com/" target="_blank" rel="noopener">mychemicalromance.com</a></li>
+      <li>Шрифты Broadsheet.</li>
       <li>Дизайн-макет «Добро пожаловать» и изображения — материалы автора проекта.</li>
-      <li>История пациента — художественный текст по мотивам концепции альбома. Все совпадения с реальными людьми случайны.</li>
+      <li>История пациента — художественный текст по мотивам концепции альбома.</li>
     </ul>
     <button class="sources__again" id="readAgain" type="button" hidden>перечитать</button>
   </section>
@@ -627,6 +627,20 @@
       <span>Олег Пащенко</span>
       <span>Б25ДЗ09</span>
     </p>
+
+    <!-- Веб-ринг курса: стрелки появляются только после нажатия на кнопку.
+         Ссылки — из общей таблицы (строка 14: предыдущая и следующая) -->
+    <div class="ring" id="ring">
+      <button class="ring__toggle" id="ringToggle" type="button" aria-expanded="false" aria-controls="ringPrev ringNext">посмотреть лонгриды других участников</button>
+      <a class="ring__arrow ring__arrow--prev" id="ringPrev" href="https://baydelll.github.io/stalker/" hidden>
+        <span class="ring__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 4 7 12l8 8"/></svg></span>
+        <span class="ring__text"><span class="ring__dir">предыдущий</span><span class="ring__name">«Где твой сталкер?»</span></span>
+      </a>
+      <a class="ring__arrow ring__arrow--next" id="ringNext" href="https://nariwa.github.io/digital-afterlife/" hidden>
+        <span class="ring__text"><span class="ring__dir">следующий</span><span class="ring__name">«Цифровое бессмертие»</span></span>
+        <span class="ring__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 4 8 8-8 8"/></svg></span>
+      </a>
+    </div>
   </footer>
 
   <!-- Плёнка поверх всего лонгрида: зерно, виньетка, мерцание, царапины, скруглённые края кинескопа -->

@@ -334,6 +334,17 @@
   });
   readAgain.addEventListener("click", () => location.reload());
 
+  /* веб-ринг: по кнопке у краёв подвала появляются стрелки к соседним лонгридам */
+  const ring = document.getElementById("ring");
+  const ringToggle = document.getElementById("ringToggle");
+  if (ring && ringToggle) {
+    ringToggle.addEventListener("click", () => {
+      ring.querySelectorAll(".ring__arrow").forEach((a) => { a.hidden = false; });
+      ringToggle.setAttribute("aria-expanded", "true");
+      requestAnimationFrame(() => requestAnimationFrame(() => ring.classList.add("is-open")));
+    });
+  }
+
   /* ---------- подвал: парад слева направо ---------- */
   const creditsTrack = document.getElementById("creditsTrack");
   if (creditsTrack && window.marcherSVG) {

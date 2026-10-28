@@ -2354,6 +2354,61 @@ html.is-gone body { background: #000; }
   font-size: max(16px, calc(22 * var(--u)));
   letter-spacing: .04em;
 }
+/* --- веб-ринг: кнопка в подвале, по нажатию у краёв выезжают стрелки --- */
+.ring { position: relative; display: flex; justify-content: center; align-items: center; min-height: max(84px, calc(110 * var(--u))); padding: 0 20px max(40px, calc(56 * var(--u))); }
+.ring__toggle {
+  padding: .7em 1.4em;
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: max(14px, calc(17 * var(--u)));
+  letter-spacing: .06em;
+  cursor: pointer;
+  transition: background-color .25s, color .25s, opacity .4s;
+}
+.ring__toggle:hover, .ring__toggle:focus-visible { background: #fff; color: #AE0C0C; }
+.ring.is-open .ring__toggle { opacity: 0; pointer-events: none; }
+.ring__arrow {
+  position: absolute;
+  top: calc(50% - max(20px, calc(28 * var(--u))));
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 40%;
+  color: #fff;
+  text-decoration: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1);
+}
+.ring__arrow[hidden] { display: none; }
+.ring__arrow--prev { left: max(16px, calc(40 * var(--u))); transform: translate(-40px, -50%); }
+.ring__arrow--next { right: max(16px, calc(40 * var(--u))); transform: translate(40px, -50%); text-align: right; }
+.ring.is-open .ring__arrow { opacity: 1; transform: translate(0, -50%); }
+.ring__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: max(52px, calc(72 * var(--u)));
+  height: max(52px, calc(72 * var(--u)));
+  border-radius: 50%;
+  background: #0b0b0b;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.35), 0 6px 18px rgba(0,0,0,.45);
+  transition: background-color .25s, transform .25s;
+}
+.ring__icon svg { width: 46%; height: 46%; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ring__arrow:hover .ring__icon, .ring__arrow:focus-visible .ring__icon { background: #fff; transform: scale(1.06); }
+.ring__arrow:hover .ring__icon svg, .ring__arrow:focus-visible .ring__icon svg { stroke: #AE0C0C; }
+.ring__text { display: flex; flex-direction: column; gap: 2px; }
+.ring__dir { font-size: 13px; letter-spacing: .12em; opacity: .85; }
+.ring__name { font-size: max(16px, calc(21 * var(--u))); line-height: 1.15; }
+@media (max-width: 760px) {
+  .ring__arrow { max-width: 46%; gap: 8px; }
+  .ring__name { display: none; }
+  .ring__dir { font-size: 12px; }
+}
 html.is-vanishing .sources, html.is-vanishing .credits { opacity: 0; }
 html.is-gone .credits { animation: sources-in 2.4s ease .6s both; }
 html.is-gone .sources { animation: sources-in 2.4s ease both; }
