@@ -2384,6 +2384,25 @@ html.is-gone body { background: #000; }
   transition: opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1);
 }
 .ring__arrow[hidden] { display: none; }
+.ring__catalog {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - max(20px, calc(28 * var(--u))));
+  transform: translate(-50%, calc(-50% + 14px));
+  padding: .7em 1.4em;
+  border: 1px solid #fff;
+  color: #fff;
+  font-size: max(14px, calc(17 * var(--u)));
+  letter-spacing: .06em;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .6s ease .15s, transform .6s cubic-bezier(.2,.7,.2,1) .15s, background-color .25s, color .25s;
+}
+.ring__catalog[hidden] { display: none; }
+.ring.is-open .ring__catalog { opacity: 1; transform: translate(-50%, -50%); }
+.ring__catalog:hover, .ring__catalog:focus-visible { background: #fff; color: #AE0C0C; }
 .ring__arrow--prev { left: max(16px, calc(40 * var(--u))); transform: translate(-40px, -50%); }
 .ring__arrow--next { right: max(16px, calc(40 * var(--u))); transform: translate(40px, -50%); text-align: right; }
 .ring.is-open .ring__arrow { opacity: 1; transform: translate(0, -50%); }
@@ -2406,8 +2425,8 @@ html.is-gone body { background: #000; }
 .ring__name { font-size: max(16px, calc(21 * var(--u))); line-height: 1.15; }
 @media (max-width: 760px) {
   .ring__arrow { max-width: 46%; gap: 8px; }
-  .ring__name { display: none; }
-  .ring__dir { font-size: 12px; }
+  .ring__text { display: none; }
+  .ring__catalog { white-space: normal; width: calc(100% - 2 * (16px + 52px + 14px)); padding: .6em .8em; font-size: 13px; line-height: 1.3; }
 }
 html.is-vanishing .sources, html.is-vanishing .credits { opacity: 0; }
 html.is-gone .credits { animation: sources-in 2.4s ease .6s both; }

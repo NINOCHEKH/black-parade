@@ -339,7 +339,7 @@
   const ringToggle = document.getElementById("ringToggle");
   if (ring && ringToggle) {
     ringToggle.addEventListener("click", () => {
-      ring.querySelectorAll(".ring__arrow").forEach((a) => { a.hidden = false; });
+      ring.querySelectorAll(".ring__arrow, .ring__catalog").forEach((a) => { a.hidden = false; });
       ringToggle.setAttribute("aria-expanded", "true");
       requestAnimationFrame(() => requestAnimationFrame(() => ring.classList.add("is-open")));
     });
